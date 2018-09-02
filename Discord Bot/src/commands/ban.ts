@@ -43,7 +43,7 @@ export default class BanCommand implements IBotCommand {
         (client.channels.get(config.kicksAndBansChannel) as discord.TextChannel).send(banEmbed)
             .then(console.log)
             .catch(console.error);
-        msgObj.guild.member(bannedUser).ban(reason) //Actually kick the user from the server
+        msgObj.guild.member(bannedUser).ban(reason) //Actually ban the user from the server
             .then(console.log)
             .catch(console.error);
     }
