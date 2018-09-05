@@ -55,7 +55,7 @@ export default class SuggestCommand implements IBotCommand {
                 suggestObject.Type = SuggestionTypes.Undecided;
         }
 
-        new apiRequestHandler().RequestAPI('POST', suggestObject, 'https://dapperdinoapi.azurewebsites.net/api/suggestion', config);
+        new apiRequestHandler().RequestAPI('POST', suggestObject, 'https://api.dapperdino.co.uk/api/suggestion', config);
 
         return data;
     };

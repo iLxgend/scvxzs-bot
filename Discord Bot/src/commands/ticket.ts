@@ -39,7 +39,7 @@ export default class TicketCommand implements IBotCommand {
         ticketObject.Applicant.Username = ticketuser.displayName;
         ticketObject.Applicant.DiscordId = ticketuser.id;
 
-        new apiRequestHandler().RequestAPI("POST", ticketObject, 'https://dapperdinoapi.azurewebsites.net/api/ticket', config);
+        new apiRequestHandler().RequestAPI("POST", ticketObject, 'https://api.dapperdino.co.uk/api/ticket', config);
 
         return data;
     };

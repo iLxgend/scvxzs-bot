@@ -44,10 +44,10 @@ export default class AddFaqCommand implements IBotCommand {
             faqObject.ResourceLink = new resourceLink();
             faqObject.ResourceLink.Link = data[3];
             faqObject.ResourceLink.DisplayName = data[4];
-            new apiRequestHandler().RequestAPI("POST", faqObject, 'https://dapperdinoapi.azurewebsites.net/api/faq', config);
+            new apiRequestHandler().RequestAPI("POST", faqObject, 'https://api.dapperdino.co.uk/api/faq', config);
         }
         else if(data[2].toLowerCase() != 'yes'){
-            new apiRequestHandler().RequestAPI("POST", faqObject, 'https://dapperdinoapi.azurewebsites.net/api/faq', config);
+            new apiRequestHandler().RequestAPI("POST", faqObject, 'https://api.dapperdino.co.uk/api/faq', config);
         }
 
         return data;
