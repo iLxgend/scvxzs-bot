@@ -6,7 +6,7 @@ export default class PurgeCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?purge/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?purge', description: 'ADMIN ONLY - (?purge [@user] [number of message to delete]) Bulk delete a number of this user\'s messages from the channel' }
+        return { caption: '?purge', description: 'ADMIN ONLY - (?purge [number of message to delete]) Bulk delete a number of messages from the channel' }
     }
 
     public init(bot: IBot, dataPath: string): void { }
@@ -21,17 +21,8 @@ export default class PurgeCommand implements IBotCommand {
         {
             return;
         }
-        let purgedUser = msgObj.guild.member(msgObj.mentions.users.first());
-        if(!purgedUser)
-        {
-            return;
-        }
-        if(purgedUser.hasPermission("MANAGE_MESSAGES"))
-        {
-            return;
-        }
         let words = msg.split(' ');
-        let amount = parseInt(words.slice(2).join(' '));
+        let amount = parseInt(words.slice(1).join(' '));
         if(isNaN(amount))
         {
             return;
