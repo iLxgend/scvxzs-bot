@@ -18,36 +18,40 @@ export default class LevelCommand implements IBotCommand {
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
     }
-    
+
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        if(!xp[msgObj.author.id]){
+        if (!xp[msgObj.author.id]) {
             xp[msgObj.author.id] = {
                 xp: 0,
                 level: 1
             };
         }
+        let levelEmbed = this.createLevelEmbed(msgObj);
+
+        msgObj.channel.send(levelEmbed).then(newMsg => {
+            msgObj.delete(0);
+            (newMsg as discord.Message).delete(5000);
+        })
+
+        fs.writeFile("../xp.json", JSON.stringify(xp), (err) => {
+            if (err) {
+                console.log(err);
+            }
+        })
+    }
+
+    private createLevelEmbed(msgObj) {
+
         let curXp = xp[msgObj.author.id].xp;
         let curLvl = xp[msgObj.author.id].level;
         let nxtLvlXp = (curLvl * 200) * 1.2;
         let difference = nxtLvlXp - curXp;
 
-        let levelEmbed = new discord.RichEmbed()
+        return new discord.RichEmbed()
             .setTitle(msgObj.author.username)
             .setColor("#ff00ff")
             .addField("Level", curLvl, true)
             .addField("XP", curXp, true)
             .setFooter(`${difference} XP until level up`, msgObj.author.displayAvatarURL)
-
-        msgObj.channel.send(levelEmbed).then(newMsg =>{
-            msgObj.delete(0);
-            (newMsg as discord.Message).delete(5000);
-        })
-        
-        fs.writeFile("../xp.json", JSON.stringify(xp), (err) =>{
-            if(err)
-            {
-                console.log(err);
-            }
-        })
     }
 }

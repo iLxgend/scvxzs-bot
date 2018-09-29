@@ -17,7 +17,7 @@ export default class RPSCommand implements IBotCommand {
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
     }
-    
+
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
         let words = msg.split(' ');
         let choice = words.slice(1).join(' ');
@@ -26,66 +26,35 @@ export default class RPSCommand implements IBotCommand {
         let rpsEmbed = new discord.RichEmbed()
             .setTitle("Rock, Paper, Scissors")
             .setColor("#ff0000")
-        if(choice == botChoice)
-        {
+        if (choice == botChoice) {
             rpsEmbed.addField("We tied!", "We both picked " + choice + "! What a coincidence", false);
             gameScores.rpsTies += 1;
         }
-        else if(choice == "rock")
+        else if
+        (
+            choice == "rock" && botChoice == "scissors" ||
+            choice == "paper" && botChoice == "rock" ||
+            choice == "scissors" && botChoice == "paper"
+        ) 
         {
-            if(botChoice == "scissors")
-            {
-                rpsEmbed.addField("Congratulations","You beat me with your " + choice + " against my " + botChoice + "!",false);
-                gameScores.rpsLosses += 1;
-            }
-            else
-            {
-                rpsEmbed.addField("What a shame...","I beat you with my " + botChoice + " against your puny " + choice + "!",false);
-                gameScores.rpsWins += 1;
-
-            }
-        }
-        else if(choice == "paper")
-        {
-            if(botChoice == "rock")
-            {
-                rpsEmbed.addField("Congratulations","You beat me with your " + choice + " against my " + botChoice + "!",false);
-                gameScores.rpsLosses += 1;
-            }
-            else
-            {
-                rpsEmbed.addField("What a shame...","I beat you with my " + botChoice + " against your puny " + choice + "!",false);
-                gameScores.rpsWins += 1;
-            }
-        }
-        else if(choice == "scissors")
-        {
-            if(botChoice == "paper")
-            {
-                rpsEmbed.addField("Congratulations","You beat me with your " + choice + " against my " + botChoice + "!",false);
-                gameScores.rpsLosses += 1;
-            }
-            else
-            {
-                rpsEmbed.addField("What a shame...","I beat you with my " + botChoice + " against your puny " + choice + "!",false);
-                gameScores.rpsWins += 1;
-            }
+            rpsEmbed.addField("Congratulations", "You beat me with your " + choice + " against my " + botChoice + "!", false);
+            gameScores.rpsLosses += 1;
         }
         else
         {
-            rpsEmbed.addField("Failed to play Rock, Paper, Scissors", "Make sure that you entered the command properly",false);
-            rpsEmbed.addField("Here is an example: ", "?rps paper", false);
+            rpsEmbed.addField("What a shame...", "I beat you with my " + botChoice + " against your puny " + choice + "!", false);
+            gameScores.rpsWins += 1;
         }
-        fs.writeFile("../gameScores.json", JSON.stringify(gameScores), (err) =>{
-            if(err)
-            {
-                console.log(err);
+        fs.writeFile("../gameScores.json", JSON.stringify(gameScores), (err) => {
+            if (err) {
+                console.error(err);
+                
             }
         })
-        rpsEmbed.addField("My stats", "Wins: " + gameScores.rpsWins + ". Losses: " + gameScores.rpsLosses + ". Ties: " + gameScores.rpsTies + ".",false);
-        msgObj.channel.send(rpsEmbed).then(newMsg =>{
+        rpsEmbed.addField("My stats", "Wins: " + gameScores.rpsWins + ". Losses: " + gameScores.rpsLosses + ". Ties: " + gameScores.rpsTies + ".", false);
+        msgObj.channel.send(rpsEmbed).then(newMsg => {
             msgObj.delete(0);
             (newMsg as discord.Message).delete(5000);
-        });      
+        });
     }
 }

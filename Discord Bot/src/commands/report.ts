@@ -15,17 +15,27 @@ export default class ReportCommand implements IBotCommand {
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
     }
-    
+
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
         let reportedUser = msgObj.guild.member(msgObj.mentions.users.first());
-        if(!reportedUser)
-        {
+        if (!reportedUser) {
             msgObj.channel.send("Sorry, I couldn't find that user");
             return;
         }
         let words = msg.split(' ');
         let reason = words.slice(2).join(' ');
-        let reportEmbed = new discord.RichEmbed() //Creates embed of report details
+        let reportEmbed = this.createReportEmbed(reportedUser, msgObj, reason)
+
+        msgObj.delete(0)
+            .then(console.log)
+            .catch(console.error);
+        (client.channels.get(config.reportChannel) as discord.TextChannel).send(reportEmbed)
+            .then(console.log)
+            .catch(console.error);
+    }
+
+    private createReportEmbed(reportedUser, msgObj, reason) {
+        return new discord.RichEmbed() //Creates embed of report details
             .setDescription("Report Details")
             .setColor("0x191a1c")
             .addField("Reported User:", reportedUser + " with ID: " + reportedUser.id)
@@ -33,11 +43,5 @@ export default class ReportCommand implements IBotCommand {
             .addField("Report in the:", msgObj.channel + " channel")
             .addField("Reported at:", msgObj.createdAt)
             .addField("Reason for report:", reason)
-        msgObj.delete(0)
-            .then(console.log)
-            .catch(console.error);
-        (client.channels.get(config.reportChannel) as discord.TextChannel).send(reportEmbed)
-            .then(console.log)
-            .catch(console.error);
     }
 }

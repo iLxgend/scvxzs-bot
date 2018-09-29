@@ -100,13 +100,7 @@ export class apiRequestHandler {
                         authCodes.indexOf(response.statusCode) < 0) {
                         
                         // let it resolve in an apiBody 
-                        return resolve(
-
-                            // This part is unfinished
-                            async (api, a) => {
-
-                            }
-                        );
+                        return resolve();
                     }
                     else if (!error && response.statusCode == 401) {
                         console.error("Not authenticated ");
