@@ -24,7 +24,7 @@ export default class ReportCommand implements IBotCommand {
         }
         let words = msg.split(' ');
         let reason = words.slice(2).join(' ');
-        let reportEmbed = this.createReportEmbed(reportedUser, msgObj, reason)
+        let reportEmbed = this.createReportEmbed(reportedUser, msgObj, reason);
 
         msgObj.delete(0)
             .then(console.log)

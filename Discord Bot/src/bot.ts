@@ -5,6 +5,7 @@ import { IBot, IBotCommand, IBotConfig, ILogger } from './api'
 import { BotMessage } from './message'
 import { websiteBotService } from './websiteBotService'
 import * as fs from 'fs'
+import { MissingChannelIdError } from './errors';
 
 const xp = require("../xp.json");
 
@@ -41,8 +42,8 @@ export class Bot implements IBot {
             if (this._config.game) {
                 this._client.user.setGame(this._config.game)
             }
-            else{
-                this._client.user.setActivity('?commands | With Dapper Dino', {type: 'PLAYING'});
+            else {
+                this._client.user.setActivity('?commands | With Dapper Dino', { type: 'PLAYING' });
             }
             if (this._config.username && this._client.user.username !== this._config.username) {
                 this._client.user.setUsername(this._config.username)
@@ -60,13 +61,19 @@ export class Bot implements IBot {
                 .setColor("#ff0000")
                 .addField("Information", "I've just sent you a PM with some details about the server, it would mean a lot if you were to give them a quick read.")
                 .addField("Thanks For Joining The Other " + (member.guild.memberCount).toString() + " Of Us!", "Sincerely, your friend, DapperBot.")
-                if(member.user.avatarURL != null){
-                    welcomeEmbed.setImage(member.user.avatarURL);
-                }
-                else{
-                    welcomeEmbed.setImage(this._client.user.displayAvatarURL);
-                }
-            this._welcomeChannel.send(welcomeEmbed);
+            if (member.user.avatarURL != null) {
+                welcomeEmbed.setImage(member.user.avatarURL);
+            }
+            else {
+                welcomeEmbed.setImage(this._client.user.displayAvatarURL);
+            }
+            if (this._welcomeChannel != null)
+                this._welcomeChannel.send(welcomeEmbed);
+            else 
+            {
+                let err = new MissingChannelIdError("welcome");
+                err.log();
+            }
             member.send("Hello " + member.displayName + ". Thanks for joining the server. If you wish to use our bot then simply use the command '?commands' in any channel and you'll recieve a pm with a list about all our commands. Anyway, here are the server rules:");
             let embed = new discord.RichEmbed()
                 .addField("Rule 1", "Keep the chat topics relevant to the channel you're using")
@@ -85,20 +92,24 @@ export class Bot implements IBot {
             member.send(embed);
             member.send("If you are happy with these rules then feel free to use the server as much as you like. The more members the merrier :D");
             member.send("Use the command '?commands' to recieve a PM with all my commands and how to use them");
-            member.send("(I am currently being tested on by my creator so if something goes wrong with me, don't panic, i'll be fixed. That's it from me. I'll see you around :)");
+            member.send("(I am currently being tested on by my creators so if something goes wrong with me, don't panic, i'll be fixed. That's it from me. I'll see you around :)");
             member.addRole(member.guild.roles.find("name", "Member"));
         })
 
         this._client.on('guildMemberRemove', async member => {
-            this._welcomeChannel.send(member + ", it's a shame you had to leave us. We'll miss you :(");
+            if (this._welcomeChannel != null)
+                this._welcomeChannel.send(member + ", it's a shame you had to leave us. We'll miss you :(");
+            else {
+                let err = new MissingChannelIdError("welcome");
+                err.log();
+            }
         })
 
         this._client.on('message', async (message) => {
             if (message.author.id !== this._botId) {
                 const text = message.cleanContent;
                 this._logger.debug(`[${message.author.tag}] ${text}`);
-                if(!xp[message.author.id])
-                {
+                if (!xp[message.author.id]) {
                     xp[message.author.id] = {
                         xp: 0,
                         level: 1
@@ -109,21 +120,20 @@ export class Bot implements IBot {
                 let curlvl = xp[message.author.id].level; // Users current level
                 let nxtLvl = (xp[message.author.id].level * 200) * 1.2; // User's required xp for level up
                 xp[message.author.id].xp = curxp + xpAmt; // Increase the user's xp
-                if(nxtLvl <= xp[message.author.id].xp) // Check for level up
+                if (nxtLvl <= xp[message.author.id].xp) // Check for level up
                 {
-                xp[message.author.id].level = curlvl + 1; // Incriment level
-                let embed = new discord.RichEmbed()
-                    .setTitle("Level Up!")
-                    .setColor("ff00ff")
-                    .addField("Congratulations", message.author)
-                    .addField("New Level:", curlvl + 1)
-                message.channel.send(embed).then(msg =>{
-                    (msg as any).delete(5000);
-                });
+                    xp[message.author.id].level = curlvl + 1; // Incriment level
+                    let embed = new discord.RichEmbed()
+                        .setTitle("Level Up!")
+                        .setColor("ff00ff")
+                        .addField("Congratulations", message.author)
+                        .addField("New Level:", curlvl + 1)
+                    message.channel.send(embed).then(msg => {
+                        (msg as any).delete(5000);
+                    });
                 }
-                fs.writeFile("../xp.json", JSON.stringify(xp), (err) =>{
-                    if(err)
-                    {
+                fs.writeFile("../xp.json", JSON.stringify(xp), (err) => {
+                    if (err) {
                         console.log(err);
                     }
                 })
