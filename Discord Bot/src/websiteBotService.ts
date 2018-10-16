@@ -38,7 +38,12 @@ export class websiteBotService {
         connection.on("SuggestionUpdate", (suggestion) => {
             let testUser = this._serverBot.users.get(suggestion.discordUser.discordId);
             if(testUser){
-                testUser.send(`Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                let suggestionUpdateEmbed = new discord.RichEmbed()
+                    .setTitle("Your suggestion has been updated!")
+                    .addField("Here you will find the information about your updated suggestion:", `Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                    .addField("Thanks as always for being a part of the community, it means a lot", "")
+                    .setFooter("With ❤ By the DapperCoding team")
+                testUser.send(suggestionUpdateEmbed)
                     .catch(console.error)
             }
         });
