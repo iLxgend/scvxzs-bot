@@ -3,7 +3,7 @@ import { applicant } from "./applicant";
 export interface ticket {
     Description: string;
     Subject: string;
-    Applicant: applicant
+    Applicant: applicant;
 }
 
 export class ticket implements ticket {

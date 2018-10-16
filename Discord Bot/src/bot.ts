@@ -1,13 +1,12 @@
-import * as discord from 'discord.js'
-import { RichEmbed } from 'discord.js'
-import * as path from 'path'
-import { IBot, IBotCommand, IBotConfig, ILogger } from './api'
-import { BotMessage } from './message'
-import { websiteBotService } from './websiteBotService'
-import * as fs from 'fs'
+import * as discord from 'discord.js';
+import { RichEmbed } from 'discord.js';
+import * as path from 'path';
+import { IBot, IBotCommand, IBotConfig, ILogger } from './api';
+import { BotMessage } from './message';
+import { websiteBotService } from './websiteBotService';
+import { xpHandler } from './xpHandler';
+import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';
-
-const xp = require("../xp.json");
 
 export class Bot implements IBot {
     public get commands(): IBotCommand[] { return this._commands }
@@ -25,6 +24,7 @@ export class Bot implements IBot {
     private _botId!: string;
     private _welcomeChannel!: discord.TextChannel;
     private _websiteBotService!: websiteBotService;
+    private _xpHandler!: xpHandler;
 
     public start(logger: ILogger, config: IBotConfig, commandsPath: string, dataPath: string) {
         this._logger = logger
@@ -53,6 +53,7 @@ export class Bot implements IBot {
             this._welcomeChannel = this._client.channels.get(this._config.welcomeChannel) as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config);
             this._websiteBotService.startupService();
+            this._xpHandler = new xpHandler(this._config);
         })
 
         this._client.on('guildMemberAdd', async member => {
@@ -109,34 +110,17 @@ export class Bot implements IBot {
             if (message.author.id !== this._botId) {
                 const text = message.cleanContent;
                 this._logger.debug(`[${message.author.tag}] ${text}`);
-                if (!xp[message.author.id]) {
-                    xp[message.author.id] = {
-                        xp: 0,
-                        level: 1
-                    };
-                }
-                let xpAmt = Math.floor(Math.random() * 10) + 5;
-                let curxp = xp[message.author.id].xp; // Users current xp
-                let curlvl = xp[message.author.id].level; // Users current level
-                let nxtLvl = (xp[message.author.id].level * 200) * 1.2; // User's required xp for level up
-                xp[message.author.id].xp = curxp + xpAmt; // Increase the user's xp
-                if (nxtLvl <= xp[message.author.id].xp) // Check for level up
-                {
-                    xp[message.author.id].level = curlvl + 1; // Incriment level
-                    let embed = new discord.RichEmbed()
-                        .setTitle("Level Up!")
-                        .setColor("ff00ff")
-                        .addField("Congratulations", message.author)
-                        .addField("New Level:", curlvl + 1)
-                    message.channel.send(embed).then(msg => {
-                        (msg as any).delete(5000);
-                    });
-                }
-                fs.writeFile("../xp.json", JSON.stringify(xp), (err) => {
-                    if (err) {
-                        console.error(err);
-                    }
-                })
+                this._xpHandler.IncreaseXpOnMessage(message);
+                /*
+                let embed = new discord.RichEmbed()
+                    .setTitle("Level Up!")
+                    .setColor("ff00ff")
+                    .addField("Congratulations", message.author)
+                    .addField("New Level:", curlvl + 1)
+                message.channel.send(embed).then(msg => {
+                    (msg as any).delete(5000);
+                });
+                */
                 for (const cmd of this._commands) {
                     try {
                         if (cmd.isValid(text)) {

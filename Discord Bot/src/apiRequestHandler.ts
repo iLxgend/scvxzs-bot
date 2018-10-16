@@ -22,7 +22,7 @@ export class apiRequestHandler {
             json: data
         }
 
-        await request(options, (error: any, response: any, body: any) => {
+        return await request(options, (error: any, response: any, body: any) => {
             console.log(response.statusCode);
             if (!error && response.statusCode == 200) {
                 return body;
@@ -36,6 +36,7 @@ export class apiRequestHandler {
             }
         })
     }
+    
     public async GenerateNewToken(first_options: any, config: IBotConfig) {
         return new Promise<apiBody>(async (resolve, reject) => {
             var options = {
