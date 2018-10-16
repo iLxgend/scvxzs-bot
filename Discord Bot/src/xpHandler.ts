@@ -60,7 +60,8 @@ export class xpHandler {
 
             new apiRequestHandler().RequestAPI("GET", null, xpUrl, this._config)
                 .then((xpReturnObject) => {
-                    return resolve(xpReturnObject.data);
+                    let xpReturn = JSON.parse(xpReturnObject.toString())
+                    return resolve(xpReturn as receiveXp);
                 });
         })
     }
