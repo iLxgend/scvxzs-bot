@@ -3,6 +3,8 @@ import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 import { createSecurePair } from 'tls';
 import * as fs from "fs"
+import { xpHandler } from '../xpHandler';
+import { postXp } from '../models/postXp';
 
 const xp = require("../../xp.json");
 
@@ -20,38 +22,30 @@ export default class LevelCommand implements IBotCommand {
     }
 
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        if (!xp[msgObj.author.id]) {
-            xp[msgObj.author.id] = {
-                xp: 0,
-                level: 1
-            };
-        }
-        let levelEmbed = this.createLevelEmbed(msgObj);
 
-        msgObj.channel.send(levelEmbed).then(newMsg => {
-            msgObj.delete(0);
-            (newMsg as discord.Message).delete(5000);
-        })
-
-        fs.writeFile("../xp.json", JSON.stringify(xp), (err) => {
-            if (err) {
-                console.log(err);
-            }
+        this.createLevelEmbed(msgObj, config)
+        .then(xpEmbed =>{
+            msgObj.channel.send(xpEmbed).then(newMsg => {
+                msgObj.delete(0);
+                (newMsg as discord.Message).delete(5000);
+            })
         })
     }
 
-    private createLevelEmbed(msgObj) {
+    private createLevelEmbed(msgObj, config) {
+        return new Promise<discord.RichEmbed>(async (resolve, reject) => {
 
-        let curXp = xp[msgObj.author.id].xp;
-        let curLvl = xp[msgObj.author.id].level;
-        let nxtLvlXp = (curLvl * 200) * 1.2;
-        let difference = nxtLvlXp - curXp;
+            new xpHandler(config)
+            .GetLevelDataById(msgObj.author.id)
+            .then(levelData => {
 
-        return new discord.RichEmbed()
-            .setTitle(msgObj.author.username)
-            .setColor("#ff00ff")
-            .addField("Level", curLvl, true)
-            .addField("XP", curXp, true)
-            .setFooter(`${difference} XP until level up`, msgObj.author.displayAvatarURL)
+                let xpEmbed = new discord.RichEmbed()
+                    .setTitle(msgObj.author.username)
+                    .setColor("#ff00ff")
+                    .addField("Level", levelData.Level, true)
+                    .addField("XP", levelData.xp, true)
+                return resolve(xpEmbed);
+            })
+        })
     }
 }

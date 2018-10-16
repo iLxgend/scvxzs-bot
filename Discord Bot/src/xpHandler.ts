@@ -4,6 +4,7 @@ import { apiRequestHandler } from './apiRequestHandler';
 import { postXp } from './models/postXp';
 import { compactDiscordUser } from './models/compactDiscordUser.js';
 import { receiveXp } from './models/receiveXp.js';
+import { compactPostXp } from './models/compactPostXp.js';
 
 export class xpHandler {
     private _config: api.IBotConfig;
@@ -35,11 +36,16 @@ export class xpHandler {
         new apiRequestHandler().RequestAPI("POST", xpObject, userXpURL, this._config)
     }
 
-    private LevelUp() {
-        
+    public async IncreaseXpDefault(discordId:string, xp:number){
+        let userXpURL = 'https://api.dapperdino.co.uk/api/xp/' + discordId;
+
+        let xpObject: compactPostXp = new compactPostXp();
+        xpObject.xp = xp;
+
+        new apiRequestHandler().RequestAPI("POST", xpObject, userXpURL, this._config)
     }
 
-    public async GetXp() {
+    public async GetLevelData() {
         let xpUrl = 'https://api.dapperdino.co.uk/api/xp'
 
         new apiRequestHandler().RequestAPI("GET", null, xpUrl, this._config)
@@ -48,13 +54,13 @@ export class xpHandler {
             });
     }
 
-    public async GetXpById(discordId: number) {
-        return new Promise<number>(async (resolve, reject) => {
+    public async GetLevelDataById(discordId: number) {
+        return new Promise<receiveXp>(async (resolve, reject) => {
             let xpUrl = `https://api.dapperdino.co.uk/api/xp/${discordId}`
 
             new apiRequestHandler().RequestAPI("GET", null, xpUrl, this._config)
                 .then((xpReturnObject) => {
-                    return resolve(xpReturnObject.data.xp);
+                    return resolve(xpReturnObject.data);
                 });
         })
     }
