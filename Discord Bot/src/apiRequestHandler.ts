@@ -12,29 +12,31 @@ export class apiRequestHandler {
     }
 
     public async RequestAPI(httpType: 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'GET' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE', data: any, requestUrl: string, config: IBotConfig) {
+        return new Promise<apiBody>(async (resolve, reject) => {
+            this._headers.Authorization = `Bearer ${config.apiBearerToken}`;
 
-        this._headers.Authorization = `Bearer ${config.apiBearerToken}`;
+            var options = {
+                url: requestUrl,
+                method: httpType,
+                headers: this._headers,
+                json: data
+            }
 
-        var options = {
-            url: requestUrl,
-            method: httpType,
-            headers: this._headers,
-            json: data
-        }
-
-        return await request(options, (error: any, response: any, body: any) => {
-            console.log(response.statusCode);
-            if (!error && response.statusCode == 200) {
-                return body;
-            }
-            else if (response.statusCode == 401) {
-                console.log(response.statusCode, error)
-                return this.GenerateNewToken(options, config);
-            }
-            else if (response.statusCode == 403) {
-                console.log("Unauthorized");
-            }
-        })
+            return await request(options, (error: any, response: any, body: any) => {
+                console.log(response.statusCode);
+                if (!error && response.statusCode == 200) {
+                    return resolve(body);
+                }
+                else if (response.statusCode == 401) {
+                    console.log(response.statusCode, error)
+                    return resolve(this.GenerateNewToken(options, config));
+                }
+                else if (response.statusCode == 403) {
+                    console.log("Unauthorized");
+                    return reject("403")
+                }
+            })
+        });
     }
     
     public async GenerateNewToken(first_options: any, config: IBotConfig) {
@@ -99,7 +101,7 @@ export class apiRequestHandler {
 
                         // auth
                         authCodes.indexOf(response.statusCode) < 0) {
-                        
+
                         // let it resolve in an apiBody 
                         return resolve();
                     }
