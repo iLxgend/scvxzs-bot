@@ -32,6 +32,16 @@ export class websiteBotService {
                     .catch(console.error)
             }
         });
+
+        connection.on("SuggestionUpdate", (suggestion) => {
+
+
+            let testUser = this._serverBot.users.get(suggestion.DiscordUser.DiscordId);
+            if(testUser){
+                testUser.send(`Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.Id}`)
+                    .catch(console.error)
+            }
+        });
     }
 
     public GetServerPopulation(){
