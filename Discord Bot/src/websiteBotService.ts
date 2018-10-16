@@ -20,10 +20,12 @@ export class websiteBotService {
     startupService = ()=> {
         
         const connection = new aspnet.HubConnectionBuilder()
-            .withUrl('https://dapperdino.azurewebsites.net/discordbothub')
-            .configureLogging(aspnet.LogLevel.Information)
+            .withUrl('https://dapperdino.co.uk/discordbothub')
+            .configureLogging(aspnet.LogLevel.Debug)
             .build();
-        connection.start().catch(err => console.error(err.toString()));    
+        connection.start()
+        .then(() => console.log("t"))
+        .catch(err => console.error(err.toString()));    
 
         connection.on("ReceiveMessage", (user, message) => {
             let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).DiscordId);
@@ -36,9 +38,9 @@ export class websiteBotService {
         connection.on("SuggestionUpdate", (suggestion) => {
 
 
-            let testUser = this._serverBot.users.get(suggestion.DiscordUser.DiscordId);
+            let testUser = this._serverBot.users.get(suggestion.discordUser.discordId);
             if(testUser){
-                testUser.send(`Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.Id}`)
+                testUser.send(`Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
                     .catch(console.error)
             }
         });
