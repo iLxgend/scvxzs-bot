@@ -1,9 +1,10 @@
 import * as discord from 'discord.js'
-import * as api from './api.js'
-import { compactDiscordUser } from './models/compactDiscordUser.js';
-import { apiRequestHandler } from './apiRequestHandler.js';
-import { email } from './models/email.js';
+import * as api from './api'
+import { compactDiscordUser } from './models/compactDiscordUser';
+import { apiRequestHandler } from './apiRequestHandler';
+import { email } from './models/email';
 import * as aspnet from '@aspnet/signalr';
+import { faqMessage } from './models/faqMessage';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -50,12 +51,12 @@ export class websiteBotService {
             }
         });
 
-        connection.on("FaqUpdate", (faq) => {
+        connection.on("FaqUpdate", async (faq) => {
             let faqChannel = this._serverBot.channels.get("461486560383336458");
 
             if(faqChannel ) {
                 let channel = faqChannel as discord.TextChannel;
-                let message = channel.messages.get(faq.id) as discord.Message;
+                let message = await channel.fetchMessage(faq.messageId) as discord.Message;
                 message
                 .delete()
                 .then(()=>{
@@ -64,13 +65,22 @@ export class websiteBotService {
                     .setDescription("-A: " + faq.answer)
                     .setColor("#2dff2d")
                     if(faq.resourceLink != null){
-                        faqEmbed.addField("Useful Resource: ","[" + faq.resourceLinkId + "](" + faq.resourceLink + ")");
+                        faqEmbed.addField("Useful Resource: ","[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
                     }
-                    channel.send(faqEmbed);
+                    channel.send(faqEmbed).then((newMsg)=>this.SetFaqMessageId((newMsg as discord.Message).id, faq.id, this._config));
                 })
                 .catch(console.error);
             }
         });
+    }
+
+    private SetFaqMessageId(messageId: string, faqId: number, config: api.IBotConfig)
+    {
+        let faqMessageObject = new faqMessage();
+        faqMessageObject.Id = faqId;
+        faqMessageObject.messageId = messageId;
+
+        new apiRequestHandler().RequestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
     }
 
     public GetServerPopulation(){
