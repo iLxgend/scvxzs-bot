@@ -23,6 +23,7 @@ export class Bot implements IBot {
     private _logger!: ILogger;
     private _botId!: string;
     private _welcomeChannel!: discord.TextChannel;
+    private _faqChannel!: discord.TextChannel;
     private _websiteBotService!: websiteBotService;
     private _xpHandler!: xpHandler;
 
@@ -30,6 +31,7 @@ export class Bot implements IBot {
         this._logger = logger
         this._config = config
         this._welcomeChannel;
+        this._faqChannel;
 
         this.loadCommands(commandsPath, dataPath)
 
@@ -51,6 +53,7 @@ export class Bot implements IBot {
             this._client.user.setStatus('online')
             this._logger.info('started...')
             this._welcomeChannel = this._client.channels.get(this._config.welcomeChannel) as discord.TextChannel;
+            this._faqChannel = this._client.channels.get(this._config.faqChannel) as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config);
             this._websiteBotService.startupService();
             this._xpHandler = new xpHandler(this._config);

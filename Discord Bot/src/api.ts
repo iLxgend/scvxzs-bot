@@ -16,6 +16,7 @@ export interface ILogger {
 export interface IBotConfig {
     token: string
     welcomeChannel: string
+    faqChannel: string
     reportChannel: string
     kicksAndBansChannel: string
     apiBearerToken: string

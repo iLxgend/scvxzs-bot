@@ -10,8 +10,6 @@ import { faqHandler } from '../faqHandler';
 
 export default class AddFaqCommand implements IBotCommand {
 
-    private _faqId: number = -1;
-
     private readonly CMD_REGEXP = /^\?addfaq/im
 
     public getHelp(): IBotCommandHelp {
@@ -45,19 +43,32 @@ export default class AddFaqCommand implements IBotCommand {
         let faqEntity:faq = new faq();
         faqEntity.Question = data[0];
         faqEntity.Answer = data[1];
+        let faqEmbed = new discord.RichEmbed()
+        .setTitle("-Q: " + data[0])
+        .setDescription("-A: " + data[1])
+        .setColor("#2dff2d")
         if(data[2].toLowerCase() == 'yes' && data[3] != null && data[4] != null){
             faqEntity.ResourceLink = new resourceLink();
             faqEntity.ResourceLink.Link = data[3];
             faqEntity.ResourceLink.DisplayName = data[4];
+            faqEmbed.addField("Useful Resource: ", "[" + data[4] + "](" + data[3] + ")");
             new faqHandler(config).AddFaq(faqEntity)
             .then(faqData => {
-                this._faqId = faqData.id;
+                ((ticketuser as discord.GuildMember).guild.channels.get((config as IBotConfig).faqChannel) as discord.TextChannel)
+                .send(faqEmbed)
+                .then(newMsg =>{
+                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.Id, config);
+                });
             })
         }
         else if(data[2].toLowerCase() != 'yes'){
             new faqHandler(config).AddFaq(faqEntity)
             .then(faqData => {
-                this._faqId = faqData.id;
+                ((ticketuser as discord.GuildMember).guild.channels.get((config as IBotConfig).faqChannel) as discord.TextChannel)
+                .send(faqEmbed)
+                .then(newMsg =>{
+                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.Id, config);
+                });
             })
         }
 
@@ -70,8 +81,6 @@ export default class AddFaqCommand implements IBotCommand {
             message.channel.send("You don't have the privileges to add to the FAQ channel!"); //Makes sure the user has the correct permissions to be able to use this command
             return;
         }
-  
-        this._faqId = -1;
 
         let collectedInfo;
         //datacallback
@@ -86,18 +95,7 @@ export default class AddFaqCommand implements IBotCommand {
 
         collectedInfo = await handler.GetInput(message.channel as discord.TextChannel, message.member, config as IBotConfig);
 
-        let faqEmbed = new discord.RichEmbed()
-            .setTitle("-Q: " + collectedInfo[0])
-            .setDescription("-A: " + collectedInfo[1])
-            .setColor("#2dff2d")
-        if(collectedInfo[2].toLowerCase() == 'yes')
-        {
-            faqEmbed.addField("Useful Resource: ", "[" + collectedInfo[4] + "](" + collectedInfo[3] + ")");
-        }
-        message.channel.send(faqEmbed).then(newMsg =>{
-            message.delete(0);
-            this.SetFaqMessageId((newMsg as discord.Message).id, this._faqId, config);
-        });
+        message.delete(0);
     }
 
     private SetFaqMessageId(messageId: string, faqId: number, config: IBotConfig)

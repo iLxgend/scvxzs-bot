@@ -4,6 +4,7 @@ import { apiRequestHandler } from './apiRequestHandler';
 import { faqMessage } from './models/faqMessage.js';
 import { resolve } from 'url';
 import { faq } from './models/faq.js';
+import { receiveFaq } from './models/receiveFaq'
 
 export class faqHandler {
     private _config: api.IBotConfig;
