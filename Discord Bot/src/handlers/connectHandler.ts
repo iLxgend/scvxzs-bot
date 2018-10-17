@@ -15,23 +15,31 @@ export class connectHandler {
     }
 
     public async registerDiscord(message: discord.Message) {
-        let registerDiscordUrl = 'https://api.dapperdino.co.uk/api/RegisterDiscord/';
+        return new Promise((resolve,reject)=> {
+            let registerDiscordUrl = 'https://api.dapperdino.co.uk/api/Account/RegisterDiscord/';
 
-        let model = new registerModel();
-
-        model.Username = message.author.username;
-        model.DiscordId = message.author.id;
-        model.registrationCode = message.content;
-
-        new apiRequestHandler()
-            .RequestAPI("POST", model, registerDiscordUrl, this._config)
-            .then(async (discordAccount) => {
-                let obj = JSON.parse(discordAccount.toString());
-                await this.sendOkMessage(message, obj);
-            })
+            let model = new registerModel();
+    
+            model.Username = message.author.username;
+            model.DiscordId = message.author.id;
+            model.registrationCode = message.content.replace("?connect ", "");
+    
+            return new apiRequestHandler()
+                .RequestAPI("POST", model, registerDiscordUrl, this._config)
+                .then(async (discordAccount) => {
+                    return await resolve(this.sendOkMessage(message, discordAccount));
+                }).catch(reason => {
+                    console.error(reason);
+                    this.sendRejectMessage(message, reason);
+                });
+        });
     }
 
     public async sendOkMessage(message:discord.Message, model) {
+        message.reply("You have successfully connected your discord account");
+    }
 
+    public async sendRejectMessage(message:discord.Message, reason) {
+        message.reply(reason);
     }
 }

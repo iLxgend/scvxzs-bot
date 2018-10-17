@@ -31,6 +31,10 @@ export class apiRequestHandler {
                     console.log(response.statusCode, error)
                     return resolve(this.GenerateNewToken(options, config));
                 }
+                else if(response.statusCode == 400){
+                    console.error(response.body)
+                    return reject(response.body);
+                }
                 else if (response.statusCode == 403) {
                     console.log("Unauthorized");
                     return reject("403")
@@ -56,8 +60,9 @@ export class apiRequestHandler {
                     if (!error && response.statusCode == 200) {
                         console.log(body);
                         config.apiBearerToken = body;
-                        this.writeToFile(body);
+                        this.writeToFile(config);
 
+                        first_options.Authorization = `Bearer ${body}`;
 
                         this.retry(first_options)
                             .then(async opt => { return resolve(opt as apiBody); }
@@ -119,7 +124,7 @@ export class apiRequestHandler {
                     console.log(err);
                     return reject(err);
                 } else {
-                    resolve(true);
+                    return resolve(true);
                 }
             })
         });

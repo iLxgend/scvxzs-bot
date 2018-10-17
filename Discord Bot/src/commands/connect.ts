@@ -2,6 +2,7 @@ import { IBot, IBotCommand, IBotCommandHelp, IBotMessage, IBotConfig } from '../
 import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 import { xpHandler } from '../handlers/xpHandler';
+import { connectHandler } from '../handlers/connectHandler';
 
 export default class RegisterCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?connect/im
@@ -17,7 +18,9 @@ export default class RegisterCommand implements IBotCommand {
     }
 
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        
+        new connectHandler(config)
+        .registerDiscord(msgObj)
+        .then()
     }
     private createLevelEmbed(msgObj, config) {
         return new Promise<discord.RichEmbed>(async (resolve, reject) => {
