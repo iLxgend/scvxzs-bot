@@ -1,10 +1,10 @@
 import * as discord from 'discord.js';
-import * as api from './api.js';
-import { apiRequestHandler } from './apiRequestHandler';
-import { faqMessage } from './models/faqMessage.js';
+import * as api from '../api.js';
+import { apiRequestHandler } from './apiRequestHandler.js';
+import { faqMessage } from '../models/faqMessage.js';
 import { resolve } from 'url';
-import { faq } from './models/faq.js';
-import { receiveFaq } from './models/receiveFaq'
+import { faq } from '../models/faq.js';
+import { receiveFaq } from '../models/receiveFaq.js'
 
 export class faqHandler {
     private _config: api.IBotConfig;
