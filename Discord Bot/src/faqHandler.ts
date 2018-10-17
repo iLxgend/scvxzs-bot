@@ -15,9 +15,10 @@ export class faqHandler {
 
     public async AddFaq(faqObject: faq){
         return new Promise<receiveFaq>(async(resolve, reject) => {
-            new apiRequestHandler().RequestAPI("POST", faqObject, 'https://api.dapperdino.co.uk/api/faq', this._config)
+            
+            return new apiRequestHandler().RequestAPI("POST", faqObject, 'https://api.dapperdino.co.uk/api/faq', this._config)
                 .then((faqReturnObject) => {
-                    let faqReturn = JSON.parse(faqReturnObject.toString());
+                    let faqReturn = JSON.parse(JSON.stringify(faqReturnObject));
                     return resolve(faqReturn as receiveFaq);
                 });
         })

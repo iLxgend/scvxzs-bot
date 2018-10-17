@@ -24,7 +24,7 @@ export class apiRequestHandler {
 
             return await request(options, (error: any, response: any, body: any) => {
                 console.log(response.statusCode);
-                if (!error && response.statusCode == 200) {
+                if (!error && response.statusCode == 200||response.statusCode == 201) {
                     return resolve(body);
                 }
                 else if (response.statusCode == 401) {
