@@ -60,12 +60,12 @@ export class websiteBotService {
                 .delete()
                 .then(()=>{
                     let faqEmbed = new discord.RichEmbed()
-                    .setTitle("Your suggestion has been updated!")
-                    .setColor("0xff0000")
-                    .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${faq.id}`)
-                    .addField("Thanks as always for being a part of the community, it means a lot", "")
-                    .setFooter("With ❤ By the DapperCoding team")
-
+                    .setTitle("-Q: " + faq.question)
+                    .setDescription("-A: " + faq.answer)
+                    .setColor("#2dff2d")
+                    if(faq.resourceLink != null){
+                        faqEmbed.addField("Useful Resource: ","[" + faq.resourceLinkId + "](" + faq.resourceLink + ")");
+                    }
                     channel.send(faqEmbed);
                 })
                 .catch(console.error);
