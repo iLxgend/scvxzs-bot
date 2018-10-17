@@ -42,7 +42,7 @@ export default class LevelCommand implements IBotCommand {
                 let xpEmbed = new discord.RichEmbed()
                     .setTitle(msgObj.author.username)
                     .setColor("#ff00ff")
-                    .addField("Level", levelData.Level, true)
+                    .addField("Level", levelData.level, true)
                     .addField("XP", levelData.xp, true)
                 return resolve(xpEmbed);
             })
