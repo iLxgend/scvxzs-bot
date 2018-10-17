@@ -4,8 +4,8 @@ import * as discord from 'discord.js'
 import * as fs from 'fs'
 import { ticket } from '../models/ticket';
 import { applicant } from '../models/applicant';
-import { apiRequestHandler } from '../apiRequestHandler';
-import { dialogueHandler, dialogueStep } from '../dialogueHandler';
+import { apiRequestHandler } from '../handlers/apiRequestHandler';
+import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 
 export default class TicketCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?ticket/im

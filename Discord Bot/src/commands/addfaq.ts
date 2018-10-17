@@ -3,10 +3,10 @@ import { getRandomInt } from '../utils';
 import * as discord from 'discord.js';
 import { faq } from '../models/faq';
 import { resourceLink } from '../models/resourceLink';
-import { apiRequestHandler } from '../apiRequestHandler';
-import { dialogueHandler, dialogueStep } from '../dialogueHandler';
+import { apiRequestHandler } from '../handlers/apiRequestHandler';
+import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 import { faqMessage } from '../models/faqMessage';
-import { faqHandler } from '../faqHandler';
+import { faqHandler } from '../handlers/faqHandler';
 
 export default class AddFaqCommand implements IBotCommand {
 

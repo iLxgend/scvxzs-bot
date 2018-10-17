@@ -4,8 +4,8 @@ import * as discord from 'discord.js'
 import * as fs from 'fs'
 import { suggest, SuggestionTypes } from '../models/suggest';
 import { discordUser } from '../models/discordUser';
-import { apiRequestHandler } from '../apiRequestHandler';
-import { dialogueStep, dialogueHandler } from '../dialogueHandler';
+import { apiRequestHandler } from '../handlers/apiRequestHandler';
+import { dialogueStep, dialogueHandler } from '../handlers/dialogueHandler';
 import { compactDiscordUser } from '../models/compactDiscordUser';
 
 export default class SuggestCommand implements IBotCommand {

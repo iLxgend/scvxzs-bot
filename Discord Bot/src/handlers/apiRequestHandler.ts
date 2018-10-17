@@ -1,5 +1,5 @@
 const request = require('request');
-import { IBotConfig } from './api'
+import { IBotConfig } from '../api'
 import * as fs from 'fs'
 import { resolve } from 'dns';
 

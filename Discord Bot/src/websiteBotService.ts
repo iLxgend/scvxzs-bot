@@ -1,7 +1,7 @@
 import * as discord from 'discord.js'
 import * as api from './api'
 import { compactDiscordUser } from './models/compactDiscordUser';
-import { apiRequestHandler } from './apiRequestHandler';
+import { apiRequestHandler } from './handlers/apiRequestHandler';
 import { email } from './models/email';
 import * as aspnet from '@aspnet/signalr';
 import { faqMessage } from './models/faqMessage';

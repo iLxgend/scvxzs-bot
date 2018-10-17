@@ -1,5 +1,5 @@
 import * as discord from 'discord.js'
-import * as api from './api.js'
+import * as api from '../api.js'
 
 export class dialogueHandler {
     private _steps: dialogueStep[] | dialogueStep;
