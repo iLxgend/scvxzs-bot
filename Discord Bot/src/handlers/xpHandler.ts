@@ -1,10 +1,10 @@
 import * as discord from 'discord.js';
-import * as api from './api.js';
-import { apiRequestHandler } from './apiRequestHandler';
-import { postXp } from './models/postXp';
-import { compactDiscordUser } from './models/compactDiscordUser.js';
-import { receiveXp } from './models/receiveXp.js';
-import { compactPostXp } from './models/compactPostXp.js';
+import * as api from '../api.js';
+import { apiRequestHandler } from '../apiRequestHandler.js';
+import { postXp } from '../models/postXp.js';
+import { compactDiscordUser } from '../models/compactDiscordUser.js';
+import { receiveXp } from '../models/receiveXp.js';
+import { compactPostXp } from '../models/compactPostXp.js';
 
 export class xpHandler {
     private _config: api.IBotConfig;
