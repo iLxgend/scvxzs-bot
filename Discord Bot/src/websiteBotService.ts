@@ -41,7 +41,8 @@ export class websiteBotService {
             if(testUser){
                 let suggestionUpdateEmbed = new discord.RichEmbed()
                     .setTitle("Your suggestion has been updated!")
-                    .addField("Here you will find the information about your updated suggestion:", `Your suggestion is updated, https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                    .setColor("0xff0000")
+                    .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
                     .addField("Thanks as always for being a part of the community, it means a lot", "")
                     .setFooter("With ❤ By the DapperCoding team")
                 testUser.send(suggestionUpdateEmbed)

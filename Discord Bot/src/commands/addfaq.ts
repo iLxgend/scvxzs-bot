@@ -5,8 +5,13 @@ import { faq } from '../models/faq';
 import { resourceLink } from '../models/resourceLink';
 import { apiRequestHandler } from '../apiRequestHandler';
 import { dialogueHandler, dialogueStep } from '../dialogueHandler';
+import { faqMessage } from '../models/faqMessage';
+import { faqHandler } from '../faqHandler';
 
 export default class AddFaqCommand implements IBotCommand {
+
+    private _faqId: number = -1;
+
     private readonly CMD_REGEXP = /^\?addfaq/im
 
     public getHelp(): IBotCommandHelp {
@@ -44,10 +49,16 @@ export default class AddFaqCommand implements IBotCommand {
             faqEntity.ResourceLink = new resourceLink();
             faqEntity.ResourceLink.Link = data[3];
             faqEntity.ResourceLink.DisplayName = data[4];
-            new apiRequestHandler().RequestAPI("POST", faqEntity, 'https://api.dapperdino.co.uk/api/faq', config);
+            new faqHandler(config).AddFaq(faqEntity)
+            .then(faqData => {
+                this._faqId = faqData.id;
+            })
         }
         else if(data[2].toLowerCase() != 'yes'){
-            new apiRequestHandler().RequestAPI("POST", faqEntity, 'https://api.dapperdino.co.uk/api/faq', config);
+            new faqHandler(config).AddFaq(faqEntity)
+            .then(faqData => {
+                this._faqId = faqData.id;
+            })
         }
 
         return data;
@@ -60,6 +71,8 @@ export default class AddFaqCommand implements IBotCommand {
             return;
         }
   
+        this._faqId = -1;
+
         let collectedInfo;
         //datacallback
 
@@ -83,6 +96,16 @@ export default class AddFaqCommand implements IBotCommand {
         }
         message.channel.send(faqEmbed).then(newMsg =>{
             message.delete(0);
+            this.SetFaqMessageId((newMsg as discord.Message).id, this._faqId, config);
         });
+    }
+
+    private SetFaqMessageId(messageId: string, faqId: number, config: IBotConfig)
+    {
+        let faqMessageObject = new faqMessage();
+        faqMessageObject.Id = faqId;
+        faqMessageObject.messageId = messageId;
+
+        new apiRequestHandler().RequestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/addmessageid', config)
     }
 }
