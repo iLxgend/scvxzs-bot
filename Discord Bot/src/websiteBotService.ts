@@ -62,7 +62,7 @@ export class websiteBotService {
                     let faqEmbed = new discord.RichEmbed()
                     .setTitle("Your suggestion has been updated!")
                     .setColor("0xff0000")
-                    .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                    .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${faq.id}`)
                     .addField("Thanks as always for being a part of the community, it means a lot", "")
                     .setFooter("With ❤ By the DapperCoding team")
 
