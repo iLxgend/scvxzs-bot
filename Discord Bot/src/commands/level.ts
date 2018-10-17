@@ -3,7 +3,7 @@ import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 import { createSecurePair } from 'tls';
 import * as fs from "fs"
-import { xpHandler } from '../xpHandler';
+import { xpHandler } from '../handlers/xpHandler';
 import { postXp } from '../models/postXp';
 
 const xp = require("../../xp.json");

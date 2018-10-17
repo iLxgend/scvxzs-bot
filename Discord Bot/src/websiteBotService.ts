@@ -23,6 +23,7 @@ export class websiteBotService {
             .withUrl('https://dapperdino.co.uk/discordbothub')
             .configureLogging(aspnet.LogLevel.Debug)
             .build();
+
         connection.start()
             .then(() => console.log("t"))
             .catch(err => console.error(err.toString()));    
