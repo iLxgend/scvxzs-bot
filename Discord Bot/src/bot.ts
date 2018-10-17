@@ -53,7 +53,7 @@ export class Bot implements IBot {
             this._client.user.setStatus('online')
             this._logger.info('started...')
             this._welcomeChannel = this._client.channels.get(this._config.welcomeChannel) as discord.TextChannel;
-            this._faqChannel = this._client.channels.get(this._config.faqChannel) as discord.TextChannel;
+            this._faqChannel = this._client.channels.get("461486560383336458") as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config);
             this._websiteBotService.startupService();
             this._xpHandler = new xpHandler(this._config);

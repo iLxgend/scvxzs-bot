@@ -47,6 +47,7 @@ export default class AddFaqCommand implements IBotCommand {
         .setTitle("-Q: " + data[0])
         .setDescription("-A: " + data[1])
         .setColor("#2dff2d")
+
         if(data[2].toLowerCase() == 'yes' && data[3] != null && data[4] != null){
             faqEntity.ResourceLink = new resourceLink();
             faqEntity.ResourceLink.Link = data[3];
@@ -54,20 +55,20 @@ export default class AddFaqCommand implements IBotCommand {
             faqEmbed.addField("Useful Resource: ", "[" + data[4] + "](" + data[3] + ")");
             new faqHandler(config).AddFaq(faqEntity)
             .then(faqData => {
-                ((ticketuser as discord.GuildMember).guild.channels.get((config as IBotConfig).faqChannel) as discord.TextChannel)
+                ((ticketuser as discord.GuildMember).guild.channels.get("461486560383336458") as discord.TextChannel)
                 .send(faqEmbed)
                 .then(newMsg =>{
-                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.Id, config);
+                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.id, config);
                 });
             })
         }
-        else if(data[2].toLowerCase() != 'yes'){
+        else if(data[2].toLowerCase() === 'no'){
             new faqHandler(config).AddFaq(faqEntity)
             .then(faqData => {
-                ((ticketuser as discord.GuildMember).guild.channels.get((config as IBotConfig).faqChannel) as discord.TextChannel)
+                ((ticketuser as discord.GuildMember).guild.channels.get("461486560383336458") as discord.TextChannel)
                 .send(faqEmbed)
                 .then(newMsg =>{
-                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.Id, config);
+                    this.SetFaqMessageId((newMsg as discord.Message).id, faqData.id, config);
                 });
             })
         }
@@ -104,6 +105,6 @@ export default class AddFaqCommand implements IBotCommand {
         faqMessageObject.Id = faqId;
         faqMessageObject.messageId = messageId;
 
-        new apiRequestHandler().RequestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/addmessageid', config)
+        new apiRequestHandler().RequestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
     }
 }
