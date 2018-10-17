@@ -49,6 +49,28 @@ export class websiteBotService {
                     .catch(console.error)
             }
         });
+
+        connection.on("FaqUpdate", (faq) => {
+            let faqChannel = this._serverBot.channels.get("461486560383336458");
+
+            if(faqChannel ) {
+                let channel = faqChannel as discord.TextChannel;
+                let message = channel.messages.get(faq.id) as discord.Message;
+                message
+                .delete()
+                .then(()=>{
+                    let faqEmbed = new discord.RichEmbed()
+                    .setTitle("Your suggestion has been updated!")
+                    .setColor("0xff0000")
+                    .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                    .addField("Thanks as always for being a part of the community, it means a lot", "")
+                    .setFooter("With ❤ By the DapperCoding team")
+
+                    channel.send(faqEmbed);
+                })
+                .catch(console.error);
+            }
+        });
     }
 
     public GetServerPopulation(){
