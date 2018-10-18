@@ -1,11 +1,11 @@
 import * as discord from 'discord.js';
-import * as api from '../api.js';
-import { apiRequestHandler } from './apiRequestHandler.js';
-import { postXp } from '../models/postXp.js';
-import { compactDiscordUser } from '../models/compactDiscordUser.js';
-import { receiveXp } from '../models/receiveXp.js';
-import { compactPostXp } from '../models/compactPostXp.js';
-import { registerModel } from '../models/registerModel.js';
+import * as api from '../api';
+import { apiRequestHandler } from './apiRequestHandler';
+import { postXp } from '../models/xp/postXp';
+import { compactDiscordUser } from '../models/compactDiscordUser';
+import { receiveXp } from '../models/xp/receiveXp';
+import { compactPostXp } from '../models/xp/compactPostXp';
+import { registerModel } from '../models/registerModel';
 
 export class connectHandler {
     private _config: api.IBotConfig;
@@ -25,7 +25,7 @@ export class connectHandler {
             model.registrationCode = message.content.replace("?connect ", "");
     
             return new apiRequestHandler()
-                .RequestAPI("POST", model, registerDiscordUrl, this._config)
+                .requestAPI("POST", model, registerDiscordUrl, this._config)
                 .then(async (discordAccount) => {
                     return await resolve(this.sendOkMessage(message, discordAccount));
                 }).catch(reason => {

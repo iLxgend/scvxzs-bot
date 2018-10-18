@@ -1,10 +1,10 @@
 import * as discord from 'discord.js'
-import * as api from './api'
-import { compactDiscordUser } from './models/compactDiscordUser';
-import { apiRequestHandler } from './handlers/apiRequestHandler';
-import { email } from './models/email';
+import * as api from '../api'
+import { compactDiscordUser } from '../models/compactDiscordUser';
+import { apiRequestHandler } from '../handlers/apiRequestHandler';
+import { email } from '../models/email';
 import * as aspnet from '@aspnet/signalr';
-import { faqMessage } from './models/faqMessage';
+import { faqMessage } from '../models/faq/faqMessage';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -56,7 +56,7 @@ export class websiteBotService {
 
             if(faqChannel ) {
                 let channel = faqChannel as discord.TextChannel;
-                let message = await channel.fetchMessage(faq.messageId) as discord.Message;
+                let message = await channel.fetchMessage(faq.messageId) ;
                 message
                 .delete()
                 .then(()=>{

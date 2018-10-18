@@ -4,7 +4,7 @@ import * as discord from 'discord.js'
 import { createSecurePair } from 'tls';
 import * as fs from "fs"
 import { xpHandler } from '../handlers/xpHandler';
-import { postXp } from '../models/postXp';
+import { postXp } from '../models/xp/postXp';
 
 const xp = require("../../xp.json");
 
@@ -36,7 +36,7 @@ export default class LevelCommand implements IBotCommand {
         return new Promise<discord.RichEmbed>(async (resolve, reject) => {
 
             new xpHandler(config)
-            .GetLevelDataById(msgObj.author.id)
+            .getLevelDataById(msgObj.author.id)
             .then(levelData => {
 
                 let xpEmbed = new discord.RichEmbed()

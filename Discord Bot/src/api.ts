@@ -1,5 +1,5 @@
 import * as discord from 'discord.js'
-import { websiteBotService } from './websiteBotService';
+import { websiteBotService } from './services/websiteBotService';
 
 export interface ILoggerMethod {
     (msg: string, ...args: any[]): void

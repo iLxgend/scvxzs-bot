@@ -1,7 +1,7 @@
 import { IBot, IBotCommand, IBotCommandHelp, IBotMessage, IBotConfig } from '../api'
 import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
-import { websiteBotService } from '../websiteBotService';
+import { websiteBotService } from '../services/websiteBotService';
 
 export default class ServerInfoCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?serverinfo/im

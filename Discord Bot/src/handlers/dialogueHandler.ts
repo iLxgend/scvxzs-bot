@@ -1,5 +1,5 @@
 import * as discord from 'discord.js'
-import * as api from '../api.js'
+import * as api from '../api'
 
 export class dialogueHandler {
     private _steps: dialogueStep[] | dialogueStep;
@@ -16,7 +16,7 @@ export class dialogueHandler {
         
     }
 
-    public async GetInput(channel: discord.TextChannel, ticketUser: discord.GuildMember, config: api.IBotConfig) {
+    public async getInput(channel: discord.TextChannel, ticketUser: discord.GuildMember, config: api.IBotConfig) {
         // Create array for single dialogueStep to prevent extra checks + coding
         if (!Array.isArray(this._steps)) {
             this._steps = [this._steps];

@@ -11,7 +11,7 @@ export class apiRequestHandler {
         'Authorization': ``
     }
 
-    public async RequestAPI(httpType: 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'GET' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE', data: any, requestUrl: string, config: IBotConfig) {
+    public async requestAPI(httpType: 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'GET' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE', data: any, requestUrl: string, config: IBotConfig) {
         return new Promise<apiBody>(async (resolve, reject) => {
             this._headers.Authorization = `Bearer ${config.apiBearerToken}`;
 
@@ -29,7 +29,7 @@ export class apiRequestHandler {
                 }
                 else if (response.statusCode == 401) {
                     console.log(response.statusCode, error)
-                    return resolve(this.GenerateNewToken(options, config));
+                    return resolve(this.generateNewToken(options, config));
                 }
                 else if(response.statusCode == 400){
                     console.error(response.body)
@@ -43,7 +43,7 @@ export class apiRequestHandler {
         });
     }
     
-    public async GenerateNewToken(first_options: any, config: IBotConfig) {
+    public async generateNewToken(first_options: any, config: IBotConfig) {
         return new Promise<apiBody>(async (resolve, reject) => {
             var options = {
                 url: "https://api.dapperdino.co.uk/api/account/login",

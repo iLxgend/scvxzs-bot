@@ -3,7 +3,7 @@ import { RichEmbed } from 'discord.js';
 import * as path from 'path';
 import { IBot, IBotCommand, IBotConfig, ILogger } from './api';
 import { BotMessage } from './message';
-import { websiteBotService } from './websiteBotService';
+import { websiteBotService } from './services/websiteBotService';
 import { xpHandler } from './handlers/xpHandler';
 import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';

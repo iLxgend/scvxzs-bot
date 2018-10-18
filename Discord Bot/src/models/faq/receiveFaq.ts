@@ -1,7 +1,7 @@
 import { faq } from "./faq";
 
 export interface receiveFaq extends faq {
-    MessageId: string;
+    messageId: string;
 }
 
 export class receiveFaq implements receiveFaq {

@@ -1,6 +1,6 @@
 export interface resourceLink {
-    DisplayName: string;
-    Link: string
+    displayName: string;
+    link: string
 }
 
 export class resourceLink implements resourceLink {

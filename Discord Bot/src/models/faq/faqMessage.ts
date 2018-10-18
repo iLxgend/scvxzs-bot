@@ -1,5 +1,5 @@
 export interface faqMessage {
-    Id: number;
+    id: number;
     messageId: string;
 }
 
