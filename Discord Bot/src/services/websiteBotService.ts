@@ -32,7 +32,8 @@ export class websiteBotService {
         connection.on("ReceiveMessage", (user, message) => {
             let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).DiscordId);
             if(testUser){
-                testUser.send(message)
+                testUser
+                    .send(message)
                     .catch(console.error)
             }
         });
@@ -77,10 +78,10 @@ export class websiteBotService {
     private SetFaqMessageId(messageId: string, faqId: number, config: api.IBotConfig)
     {
         let faqMessageObject = new faqMessage();
-        faqMessageObject.Id = faqId;
+        faqMessageObject.id = faqId;
         faqMessageObject.messageId = messageId;
 
-        new apiRequestHandler().RequestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
+        new apiRequestHandler().requestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
     }
 
     public GetServerPopulation(){
@@ -124,7 +125,7 @@ export class websiteBotService {
     public GetDiscordUserByEmail(emailAddress:string){
         let emailObject = new email();
         emailObject.Email = emailAddress;
-        let responseData = new apiRequestHandler().RequestAPI("POST", emailObject, "https://dapperdinoapi.azurewebsites.net/api/search/user", this._config);
+        let responseData = new apiRequestHandler().requestAPI("POST", emailObject, "https://dapperdinoapi.azurewebsites.net/api/search/user", this._config);
         console.log(responseData);
     }
 }

@@ -1,6 +1,6 @@
 export interface applicant {
-    DiscordId: string;
-    Username: string
+    discordId: string;
+    username: string
 }
 
 export class applicant implements applicant {

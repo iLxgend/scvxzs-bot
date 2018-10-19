@@ -1,9 +1,9 @@
 import { applicant } from "./applicant";
 
 export interface ticket {
-    Description: string;
-    Subject: string;
-    Applicant: applicant;
+    description: string;
+    subject: string;
+    applicant: applicant;
 }
 
 export class ticket implements ticket {

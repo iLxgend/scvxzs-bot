@@ -63,7 +63,7 @@ export default class SuggestCommand implements IBotCommand {
                 suggestObject.Type = SuggestionTypes.Undecided;
         }
 
-        new apiRequestHandler().RequestAPI('POST', suggestObject, 'https://api.dapperdino.co.uk/api/suggestion', config);
+        new apiRequestHandler().requestAPI('POST', suggestObject, 'https://api.dapperdino.co.uk/api/suggestion', config);
 
         return data;
     };
@@ -91,7 +91,7 @@ export default class SuggestCommand implements IBotCommand {
         
         let handler = new dialogueHandler([suggestionCategoryStep, suggestionStep], collectedInfo);
 
-        collectedInfo = await handler.GetInput(message.channel as discord.TextChannel, message.member, config as IBotConfig);
+        collectedInfo = await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig);
 
         fs.appendFile('../suggestions.txt', "ID: " + message.author + ", Username: " + message.author.username + ", Suggestion: " + collectedInfo[1] + "\n", function(err){
             if(err)

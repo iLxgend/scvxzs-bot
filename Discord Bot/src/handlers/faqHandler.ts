@@ -13,14 +13,15 @@ export class faqHandler {
         this._config = config;
     }
 
-    public async addFaq(faqObject: faq){
-        return new Promise<receiveFaq>(async(resolve, reject) => {
-            
+    public async addFaq(faqObject: faq) {
+        return new Promise<receiveFaq>(async (resolve, reject) => {
+
             return new apiRequestHandler().requestAPI("POST", faqObject, 'https://api.dapperdino.co.uk/api/faq', this._config)
                 .then((faqReturnObject) => {
                     let faqReturn = JSON.parse(JSON.stringify(faqReturnObject));
                     return resolve(faqReturn as receiveFaq);
-                });
+                })
+                .catch(err => { return reject(err); });
         })
     }
 }

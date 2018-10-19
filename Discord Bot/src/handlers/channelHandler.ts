@@ -38,6 +38,15 @@ export class channelhandler {
                     "EMBED_LINKS": true,
                 });
 
+                // Add permissions for admins
+                channel.overwritePermissions("admin", {
+                    "READ_MESSAGE_HISTORY": true,
+                    "SEND_MESSAGES": true,
+                    "VIEW_CHANNEL": true,
+                    "EMBED_LINKS": true,
+                });
+
+
                 // Remove permissions for everyone else
                 channel.overwritePermissions(message.guild.id, {
                     "READ_MESSAGE_HISTORY": false,
@@ -59,16 +68,21 @@ export class channelhandler {
     }
 
     /**
-     * name: addToChannelTicketCommand
-     * description: add to channel, ticket system add h2h to ticket
+     * name: addPermissionsToChannelTicketCommand
+     * description: add permissions for this channel to the h2h-er that used ?acceptTicket {ticketId} 
      * params:
      * - ticketId = ticket id got from api/signalR
      * - message = h2h-er accept message
      */
-    public async addToChannelTicketCommand(ticketId: number, message: discord.Message) {
+    public async addPermissionsToChannelTicketCommand(ticketId: number, message: discord.Message) {
+
+        // Find channel based on ticketId
         var channel = message.guild.channels.find('name', `ticket${ticketId}`);
 
+        // If channel is found
         if (channel) {
+
+            // Add premissions to channel for h2h-er 
             channel.overwritePermissions(message.author, {
                 "READ_MESSAGE_HISTORY": true,
                 "SEND_MESSAGES": true,

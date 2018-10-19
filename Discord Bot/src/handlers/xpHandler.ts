@@ -54,7 +54,7 @@ export class xpHandler {
             });
     }
 
-    public async GetLevelDataById(discordId: number) {
+    public async getLevelDataById(discordId: number) {
         return new Promise<receiveXp>(async (resolve, reject) => {
             let xpUrl = `https://api.dapperdino.co.uk/api/xp/${discordId}`
 

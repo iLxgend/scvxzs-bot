@@ -2,8 +2,8 @@ import { IBot, IBotCommand, IBotCommandHelp, IBotMessage, IBotConfig } from '../
 import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 import * as fs from 'fs'
-import { ticket } from '../models/ticket';
-import { applicant } from '../models/applicant';
+import { ticket } from '../models/ticket/ticket';
+import { applicant } from '../models/ticket/applicant';
 import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 
@@ -33,13 +33,18 @@ export default class TicketCommand implements IBotCommand {
 
     httpFunc = (response: any, data: any, ticketuser: any, config: any) => {
         let ticketObject: ticket = new ticket();
-        ticketObject.Applicant = new applicant()
-        ticketObject.Subject = data[0];
-        ticketObject.Description = data[1];
-        ticketObject.Applicant.Username = ticketuser.displayName;
-        ticketObject.Applicant.DiscordId = ticketuser.id;
+        ticketObject.applicant = new applicant()
+        ticketObject.subject = data[0];
+        ticketObject.description = data[1];
+        ticketObject.applicant.username = ticketuser.displayName;
+        ticketObject.applicant.discordId = ticketuser.id;
 
-        new apiRequestHandler().RequestAPI("POST", ticketObject, 'https://api.dapperdino.co.uk/api/ticket', config);
+        new apiRequestHandler()
+            .requestAPI("POST", ticketObject, 'https://api.dapperdino.co.uk/api/ticket', config)
+            .then(value => {
+                var ticket = JSON.parse(JSON.stringify(value)) as ticket;
+                
+            });
 
         return data;
     };
@@ -49,12 +54,24 @@ export default class TicketCommand implements IBotCommand {
         let collectedInfo;
         //datacallback
 
-        let test: dialogueStep = new dialogueStep("Enter a title for your ticket, quickly summarise the problem that you are having:", "Title Successful", "Title Unsuccessful", this.cbFunc, collectedInfo);
-        let test2: dialogueStep = new dialogueStep("Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with:", "Description Successful", "Description Unsuccessful", this.cbFunc, this.httpFunc, collectedInfo);
+        let test: dialogueStep = new dialogueStep(
+            "Enter a title for your ticket, quickly summarise the problem that you are having:",
+            "Title Successful",
+            "Title Unsuccessful",
+            this.cbFunc,
+            collectedInfo);
+
+        let test2: dialogueStep = new dialogueStep(
+            "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with:",
+            "Description Successful",
+            "Description Unsuccessful",
+            this.cbFunc,
+            this.httpFunc,
+            collectedInfo);
 
         let handler = new dialogueHandler([test, test2], collectedInfo);
 
-        collectedInfo = await handler.GetInput(msgObj.channel as discord.TextChannel, msgObj.member, config as IBotConfig);
+        collectedInfo = await handler.getInput(msgObj.channel as discord.TextChannel, msgObj.member, config as IBotConfig);
 
         let ticketEmbed = new discord.RichEmbed()
             .setTitle("Ticket Created Successfully!")
@@ -64,6 +81,6 @@ export default class TicketCommand implements IBotCommand {
             .setFooter("Thank you for subitting a ticket " + msgObj.author.username + ". We'll try to get around to it as soon as possible, please be patient.")
 
         msgObj.delete(0);
-        msgObj.channel.send(ticketEmbed);    
+        msgObj.channel.send(ticketEmbed);
     }
 }

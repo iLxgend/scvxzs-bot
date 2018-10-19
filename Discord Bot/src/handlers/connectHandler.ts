@@ -31,6 +31,7 @@ export class connectHandler {
                 }).catch(reason => {
                     console.error(reason);
                     this.sendRejectMessage(message, reason);
+                    return reject(reason);
                 });
         });
     }
