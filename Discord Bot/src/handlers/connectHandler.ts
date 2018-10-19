@@ -20,8 +20,8 @@ export class connectHandler {
 
             let model = new registerModel();
     
-            model.Username = message.author.username;
-            model.DiscordId = message.author.id;
+            model.username = message.author.username;
+            model.discordId = message.author.id;
             model.registrationCode = message.content.replace("?connect ", "");
     
             return new apiRequestHandler()

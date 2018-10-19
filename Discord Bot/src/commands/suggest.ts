@@ -42,8 +42,8 @@ export default class SuggestCommand implements IBotCommand {
 
         // Add discord user information to the suggestion
         suggestObject.DiscordUser = new discordUser();
-        suggestObject.DiscordUser.Username = ticketuser.displayName;
-        suggestObject.DiscordUser.DiscordId = ticketuser.id;
+        suggestObject.DiscordUser.username = ticketuser.displayName;
+        suggestObject.DiscordUser.discordId = ticketuser.id;
 
         // Select suggestion type
         switch(data[0].toLowerCase()){

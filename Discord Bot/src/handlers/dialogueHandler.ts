@@ -16,17 +16,17 @@ export class dialogueHandler {
         
     }
 
-    public async getInput(channel: discord.TextChannel, ticketUser: discord.GuildMember, config: api.IBotConfig) {
+    public async getInput(channel: discord.TextChannel, user: discord.GuildMember, config: api.IBotConfig) {
         // Create array for single dialogueStep to prevent extra checks + coding
         if (!Array.isArray(this._steps)) {
             this._steps = [this._steps];
         }
         for (const step of this._steps) {
-            const filter = m => (m.member == ticketUser);
+            const filter = m => (m.member == user);
             
             let response, beforeM;
 
-            channel.send(ticketUser + ", " + step.beforeMessage).then(newMsg =>{
+            channel.send(user + ", " + step.beforeMessage).then(newMsg =>{
                 beforeM = newMsg;
             });
 
@@ -40,7 +40,7 @@ export class dialogueHandler {
                     }
 
                     if (step.httpCallback != null){
-                        this._data = step.httpCallback(response.content, this._data, ticketUser, config);
+                        this._data = step.httpCallback(response.content, this._data, user, config);
                     }
 
                     console.log("DH " + this._endEarly)

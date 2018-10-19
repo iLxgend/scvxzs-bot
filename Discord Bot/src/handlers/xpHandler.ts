@@ -19,8 +19,8 @@ export class xpHandler {
         let xpObject: postXp = new postXp();
         let xpValue = Math.floor(Math.random() * 10) + 5;
         xpObject.xp = xpValue;
-        xpObject.DiscordId = message.author.id;
-        xpObject.Username = message.author.username;
+        xpObject.discordId = message.author.id;
+        xpObject.username = message.author.username;
 
         new apiRequestHandler().requestAPI("POST", xpObject, userXpURL, this._config)
     }
@@ -30,8 +30,8 @@ export class xpHandler {
 
         let xpObject: postXp = new postXp();
         xpObject.xp = xp;
-        xpObject.DiscordId = message.author.id;
-        xpObject.Username = message.author.username;
+        xpObject.discordId = message.author.id;
+        xpObject.username = message.author.username;
 
         new apiRequestHandler().requestAPI("POST", xpObject, userXpURL, this._config)
     }

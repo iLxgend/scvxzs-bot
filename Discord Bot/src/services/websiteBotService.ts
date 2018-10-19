@@ -30,7 +30,7 @@ export class websiteBotService {
             .catch(err => console.error(err.toString()));    
 
         connection.on("ReceiveMessage", (user, message) => {
-            let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).DiscordId);
+            let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).discordId);
             if(testUser){
                 testUser
                     .send(message)
@@ -100,8 +100,8 @@ export class websiteBotService {
         }
         let userObject = new compactDiscordUser()
         if(user != null){
-            userObject.Username = user.username;
-            userObject.DiscordId = user.id;
+            userObject.username = user.username;
+            userObject.discordId = user.id;
         }
         return userObject;
     }
@@ -116,8 +116,8 @@ export class websiteBotService {
             }
         }
         let userObject = new compactDiscordUser()
-        userObject.Username = user.username;
-        userObject.DiscordId = user.id;
+        userObject.username = user.username;
+        userObject.discordId = user.id;
 
         return userObject;
     }

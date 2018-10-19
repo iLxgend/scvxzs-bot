@@ -1,6 +1,6 @@
 export interface compactDiscordUser {
-    DiscordId: string;
-    Username: string;
+    discordId: string;
+    username: string;
 }
 
 export class compactDiscordUser implements compactDiscordUser {
