@@ -90,7 +90,7 @@ export default class TicketCommand implements IBotCommand {
         return [data, endEarly];
     };
 
-    apiCall = (response: any, data: any, ticketuser: discord.ClientUser, config: any) => {
+    apiCall = (response: any, data: any, ticketuser: any, config: any) => {
 
         // Create new ticket object
         let ticketObject: ticket = new ticket();
@@ -103,7 +103,7 @@ export default class TicketCommand implements IBotCommand {
         ticketObject.description = data[1];
 
         // Fill properties of applicant
-        ticketObject.applicant.username = ticketuser.username;
+        ticketObject.applicant.username = ticketuser.displayName;
         ticketObject.applicant.discordId = ticketuser.id;
 
         // Post request to /api/Ticket/ 

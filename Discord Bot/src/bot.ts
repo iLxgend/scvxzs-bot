@@ -7,6 +7,7 @@ import { websiteBotService } from './services/websiteBotService';
 import { xpHandler } from './handlers/xpHandler';
 import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';
+import { apiBotService } from './services/apiBotService';
 
 export class Bot implements IBot {
     public get commands(): IBotCommand[] { return this._commands }
@@ -26,6 +27,7 @@ export class Bot implements IBot {
     private _faqChannel!: discord.TextChannel;
     private _websiteBotService!: websiteBotService;
     private _xpHandler!: xpHandler;
+    private _apiBotService!: apiBotService;
 
     public start(logger: ILogger, config: IBotConfig, commandsPath: string, dataPath: string) {
         this._logger = logger
@@ -56,6 +58,8 @@ export class Bot implements IBot {
             this._faqChannel = this._client.channels.get("461486560383336458") as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config);
             this._websiteBotService.startupService();
+            this._apiBotService = new apiBotService(this._client, this._config);
+            this._apiBotService.startupService();
             this._xpHandler = new xpHandler(this._config);
         })
 
