@@ -111,7 +111,11 @@ export class apiRequestHandler {
                     }
                 }).then(async (a) => {
                     return resolve();
-                });
+                }).catch(err =>
+                    {
+                        console.error(err);
+                        reject(err);
+                    });
             } catch (error) {
 
             }

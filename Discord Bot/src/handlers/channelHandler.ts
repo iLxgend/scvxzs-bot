@@ -4,7 +4,7 @@ export class channelhandler {
 
     private _guild: discord.Guild;
 
-    constructor(guild: discord.Guild){
+    constructor(guild: discord.Guild) {
         this._guild = guild;
     }
 
@@ -23,6 +23,9 @@ export class channelhandler {
 
             //Find the role 'Admin'
             var adminRole = message.guild.roles.find("name", "Admin");
+
+            //Find the role 'Dapper Bot'
+            var dapperRole = message.guild.roles.find("name", "Dapper Bot");
 
             // Find category 'Tickets'
             var category = message.guild.channels.find('name', 'Tickets') as discord.CategoryChannel;
@@ -55,6 +58,13 @@ export class channelhandler {
                         "EMBED_LINKS": true,
                     });
 
+                    // Add permissions for dapper bot
+                    channel.overwritePermissions(dapperRole, {
+                        "READ_MESSAGE_HISTORY": true,
+                        "SEND_MESSAGES": true,
+                        "VIEW_CHANNEL": true,
+                        "EMBED_LINKS": true,
+                    });
 
                     // Remove permissions for everyone else
                     channel.overwritePermissions(message.guild.id, {
@@ -71,7 +81,7 @@ export class channelhandler {
                         .addField("Please be patient whilst waiting for a helper to respond.", "Once you have finished your discussion and your question has been answered please use the command:\n__**?closeTicket**__")
                         .addField("When your ticket is accepted you will be notified here", "Just remember to be patient and well mannered as these members are giving up their own time to help you")
                         .setFooter("In the meantime you can start explaining your problems here as the Happy-To-Help member will be able to read all messages in the channel when they join");
-                        
+
                     (channel as discord.TextChannel).send(ticketChannelEmbed);
 
                     return resolve(channel);
