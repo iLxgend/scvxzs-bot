@@ -7,7 +7,10 @@ import { websiteBotService } from './services/websiteBotService';
 import { xpHandler } from './handlers/xpHandler';
 import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';
+<<<<<<< HEAD
 import { messageService } from './services/messageService';
+=======
+>>>>>>> 8ad44b55146599970381cbb66023993ef3456702
 import { apiBotService } from './services/apiBotService';
 
 export class Bot implements IBot {
@@ -33,6 +36,7 @@ export class Bot implements IBot {
     private _apiBotService!: apiBotService;
     private _messageService!: messageService;
     private _xpHandler!: xpHandler;
+    private _apiBotService!: apiBotService;
 
     public start(logger: ILogger, config: IBotConfig, commandsPath: string, dataPath: string) {
         this._logger = logger
@@ -69,9 +73,14 @@ export class Bot implements IBot {
             this._kicksAndBansChannel = this._server.channels.find("name", "kicks-and-bans") as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
             this._websiteBotService.startupService();
+<<<<<<< HEAD
             this._apiBotService = new apiBotService(this._client, this._config, this._server);
             this._apiBotService.startupService();
             this._messageService = new messageService(this._client, this._config);
+=======
+            this._apiBotService = new apiBotService(this._client, this._config);
+            this._apiBotService.startupService();
+>>>>>>> 8ad44b55146599970381cbb66023993ef3456702
             this._xpHandler = new xpHandler(this._config);
         })
 
