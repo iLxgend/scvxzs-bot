@@ -57,7 +57,7 @@ export class apiRequestHandler {
             return await request(options, (error: any, response: any, body: any) => {
                 console.log(response.statusCode);
                 if (!error && response.statusCode == 200||response.statusCode == 201) {
-                    return resolve(body);
+                    return resolve(JSON.parse(body) as T);
                 }
                 else if (response.statusCode == 401) {
                     console.log(response.statusCode, error)
@@ -217,7 +217,7 @@ export class apiRequestHandler {
                         authCodes.indexOf(response.statusCode) < 0) {
 
                         // let it resolve in an apiBody 
-                        return resolve(body as T);
+                        return resolve(JSON.parse(body) as T);
                     }
                     else if (!error && response.statusCode == 401) {
                         console.error("Not authenticated ");
