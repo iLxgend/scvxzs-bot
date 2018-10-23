@@ -8,9 +8,12 @@ import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 import { ticketReceive } from '../models/ticket/ticketReceive';
 import { channelhandler } from '../handlers/channelHandler';
+import { websiteBotService } from '../services/websiteBotService';
 
 export default class TicketCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?ticket/im
+
+    private _guild;
 
     public getHelp(): IBotCommandHelp {
         return { caption: '?ticket', description: 'Creates a ticket for you to fill in via the prompts' }
@@ -32,7 +35,9 @@ export default class TicketCommand implements IBotCommand {
         return this.dMessage;
     }
 
-    public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
+    public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], wbs:websiteBotService, guild:discord.Guild): Promise<void> {
+
+        this._guild = guild;
 
         // Array of collected info
         let collectedInfo;
@@ -118,6 +123,8 @@ export default class TicketCommand implements IBotCommand {
                 // Parse object
                 var ticket = JSON.parse(JSON.stringify(value)) as ticketReceive;
 
+                console.log(ticket);
+
                 // Get message for getting author info
                 var message = this.getMessage();
 
@@ -125,7 +132,7 @@ export default class TicketCommand implements IBotCommand {
                 if (message != null) {
                     
                     // Create new channelHandler
-                    new channelhandler()
+                    new channelhandler(this._guild)
 
                     // Add author to ticket
                     .createChannelTicketCommand(ticket.id, message);

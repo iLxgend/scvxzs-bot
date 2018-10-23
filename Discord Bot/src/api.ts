@@ -15,6 +15,7 @@ export interface ILogger {
 
 export interface IBotConfig {
     token: string
+    serverId: string
     welcomeChannel: string
     faqChannel: string
     reportChannel: string
@@ -46,7 +47,7 @@ export interface IBotCommand {
     getHelp(): IBotCommandHelp
     init(bot: IBot, dataPath: string): void
     isValid(msg: string): boolean
-    process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], webBotService:websiteBotService): Promise<void>
+    process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], webBotService:websiteBotService, guild:discord.Guild): Promise<void>
 }
 
 export interface IUser {

@@ -10,16 +10,18 @@ import { faqMessage } from '../models/faq/faqMessage';
 
 export class websiteBotService {
 
-    private _serverBot:discord.Client
-    private _config:api.IBotConfig
+    private _serverBot: discord.Client
+    private _config: api.IBotConfig
+    private _server: discord.Guild;
 
-    constructor(serverBot:discord.Client, config:api.IBotConfig) {
+    constructor(serverBot: discord.Client, config: api.IBotConfig, server: discord.Guild) {
         this._serverBot = serverBot;
-        this._config = config;        
+        this._config = config;
+        this._server = server;
     }
 
-    startupService = ()=> {
-        
+    startupService = () => {
+
         const connection = new aspnet.HubConnectionBuilder()
             .withUrl('https://dapperdino.co.uk/discordbothub')
             .configureLogging(aspnet.LogLevel.Debug)
@@ -27,11 +29,11 @@ export class websiteBotService {
 
         connection.start()
             .then(() => console.log("t"))
-            .catch(err => console.error(err.toString()));    
+            .catch(err => console.error(err.toString()));
 
         connection.on("ReceiveMessage", (user, message) => {
             let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).discordId);
-            if(testUser){
+            if (testUser) {
                 testUser
                     .send(message)
                     .catch(console.error)
@@ -40,7 +42,7 @@ export class websiteBotService {
 
         connection.on("SuggestionUpdate", (suggestion) => {
             let testUser = this._serverBot.users.get(suggestion.discordUser.discordId);
-            if(testUser){
+            if (testUser) {
                 let suggestionUpdateEmbed = new discord.RichEmbed()
                     .setTitle("Your suggestion has been updated!")
                     .setColor("0xff0000")
@@ -55,28 +57,27 @@ export class websiteBotService {
         connection.on("FaqUpdate", async (faq) => {
             let faqChannel = this._serverBot.channels.get("461486560383336458");
 
-            if(faqChannel ) {
+            if (faqChannel) {
                 let channel = faqChannel as discord.TextChannel;
-                let message = await channel.fetchMessage(faq.messageId) ;
+                let message = await channel.fetchMessage(faq.messageId);
                 message
-                .delete()
-                .then(()=>{
-                    let faqEmbed = new discord.RichEmbed()
-                    .setTitle("-Q: " + faq.question)
-                    .setDescription("-A: " + faq.answer)
-                    .setColor("#2dff2d")
-                    if(faq.resourceLink != null){
-                        faqEmbed.addField("Useful Resource: ","[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
-                    }
-                    channel.send(faqEmbed).then((newMsg)=>this.SetFaqMessageId((newMsg as discord.Message).id, faq.id, this._config));
-                })
-                .catch(console.error);
+                    .delete()
+                    .then(() => {
+                        let faqEmbed = new discord.RichEmbed()
+                            .setTitle("-Q: " + faq.question)
+                            .setDescription("-A: " + faq.answer)
+                            .setColor("#2dff2d")
+                        if (faq.resourceLink != null) {
+                            faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
+                        }
+                        channel.send(faqEmbed).then((newMsg) => this.SetFaqMessageId((newMsg as discord.Message).id, faq.id, this._config));
+                    })
+                    .catch(console.error);
             }
         });
     }
 
-    private SetFaqMessageId(messageId: string, faqId: number, config: api.IBotConfig)
-    {
+    private SetFaqMessageId(messageId: string, faqId: number, config: api.IBotConfig) {
         let faqMessageObject = new faqMessage();
         faqMessageObject.id = faqId;
         faqMessageObject.messageId = messageId;
@@ -84,33 +85,56 @@ export class websiteBotService {
         new apiRequestHandler().requestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
     }
 
-    public GetServerPopulation(){
-        return this._serverBot.users.array().length;
+    public GetAllWithRole(requestedRole: string) {
+
+        //Get all members in the server
+        let allUsers = this._server.members.array();
+
+        //Create an array to story all the members with the requested role
+        let usersWithRole = new Array<discord.GuildMember>();
+
+        //Loop through all the members in the server
+        for (let i = 0; i < allUsers.length; i++) {
+
+            //Check if any of their roles has the same name as the requested role
+            if (allUsers[i].roles.find((role) => role.name === requestedRole)) {
+
+                //Add that member to the list
+                usersWithRole.push(allUsers[i]);
+            }
+        }
+
+        //Return all the members that have the role
+        return usersWithRole;
     }
 
-    public GetDiscordUserByUsername(username:string){
+    public GetServerPopulation() {
+        return this._server.members.array().length;
+    }
+
+    public GetDiscordUserByUsername(username: string) {
         let allUsers = this._serverBot.users.array();
         let user;
-        for(let i = 0; i < allUsers.length; i++){
+        for (let i = 0; i < allUsers.length; i++) {
 
-            if(allUsers[i].username == username){            
+            if (allUsers[i].username == username) {
                 user = allUsers[i];
                 break;
             }
         }
         let userObject = new compactDiscordUser()
-        if(user != null){
+        if (user != null) {
             userObject.username = user.username;
             userObject.discordId = user.id;
         }
         return userObject;
     }
 
-    public GetDiscordUserById(id:string){
+    public GetDiscordUserById(id: string) {
         let allUsers = this._serverBot.users.array();
         let user;
-        for(let i = 0; i < allUsers.length; i++){
-            if(allUsers[i].id == id){
+        for (let i = 0; i < allUsers.length; i++) {
+            if (allUsers[i].id == id) {
                 user = allUsers[i];
                 break;
             }
@@ -122,7 +146,7 @@ export class websiteBotService {
         return userObject;
     }
 
-    public GetDiscordUserByEmail(emailAddress:string){
+    public GetDiscordUserByEmail(emailAddress: string) {
         let emailObject = new email();
         emailObject.Email = emailAddress;
         let responseData = new apiRequestHandler().requestAPI("POST", emailObject, "https://dapperdinoapi.azurewebsites.net/api/search/user", this._config);

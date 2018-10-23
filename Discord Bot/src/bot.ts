@@ -7,6 +7,8 @@ import { websiteBotService } from './services/websiteBotService';
 import { xpHandler } from './handlers/xpHandler';
 import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';
+import { messageService } from './services/messageService';
+import { apiBotService } from './services/apiBotService';
 
 export class Bot implements IBot {
     public get commands(): IBotCommand[] { return this._commands }
@@ -22,15 +24,23 @@ export class Bot implements IBot {
     private _config!: IBotConfig;
     private _logger!: ILogger;
     private _botId!: string;
+    private _server!: discord.Guild;
     private _welcomeChannel!: discord.TextChannel;
+    private _reportChannel!: discord.TextChannel;
+    private _kicksAndBansChannel!: discord.TextChannel;
     private _faqChannel!: discord.TextChannel;
     private _websiteBotService!: websiteBotService;
+    private _apiBotService!: apiBotService;
+    private _messageService!: messageService;
     private _xpHandler!: xpHandler;
 
     public start(logger: ILogger, config: IBotConfig, commandsPath: string, dataPath: string) {
         this._logger = logger
         this._config = config
+        this._server;
         this._welcomeChannel;
+        this._reportChannel;
+        this._kicksAndBansChannel;
         this._faqChannel;
 
         this.loadCommands(commandsPath, dataPath)
@@ -52,10 +62,16 @@ export class Bot implements IBot {
             }
             this._client.user.setStatus('online')
             this._logger.info('started...')
-            this._welcomeChannel = this._client.channels.get(this._config.welcomeChannel) as discord.TextChannel;
-            this._faqChannel = this._client.channels.get("461486560383336458") as discord.TextChannel;
-            this._websiteBotService = new websiteBotService(this._client, this._config);
+            this._server = this._client.guilds.find("id", this._config.serverId)
+            this._welcomeChannel = this._server.channels.find("name", "welcome") as discord.TextChannel;
+            this._faqChannel = this._server.channels.find("name", "f-a-q") as discord.TextChannel;
+            this._reportChannel = this._server.channels.find("name", "reports") as discord.TextChannel;
+            this._kicksAndBansChannel = this._server.channels.find("name", "kicks-and-bans") as discord.TextChannel;
+            this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
             this._websiteBotService.startupService();
+            this._apiBotService = new apiBotService(this._client, this._config, this._server);
+            this._apiBotService.startupService();
+            this._messageService = new messageService(this._client, this._config);
             this._xpHandler = new xpHandler(this._config);
         })
 
@@ -73,8 +89,7 @@ export class Bot implements IBot {
             }
             if (this._welcomeChannel != null)
                 this._welcomeChannel.send(welcomeEmbed);
-            else 
-            {
+            else {
                 let err = new MissingChannelIdError("welcome");
                 err.log();
             }
@@ -102,7 +117,7 @@ export class Bot implements IBot {
 
         this._client.on('guildMemberRemove', async member => {
             if (this._welcomeChannel != null)
-                this._welcomeChannel.send(member + ", it's a shame you had to leave us. We'll miss you :(");
+                this._welcomeChannel.send(member.displayName + ", it's a shame you had to leave us. We'll miss you :(");
             else {
                 let err = new MissingChannelIdError("welcome");
                 err.log();
@@ -113,27 +128,43 @@ export class Bot implements IBot {
             if (message.author.id !== this._botId) {
                 const text = message.cleanContent;
                 this._logger.debug(`[${message.author.tag}] ${text}`);
-                this._xpHandler.IncreaseXpOnMessage(message);
-                /*
-                let embed = new discord.RichEmbed()
-                    .setTitle("Level Up!")
-                    .setColor("ff00ff")
-                    .addField("Congratulations", message.author)
-                    .addField("New Level:", curlvl + 1)
-                message.channel.send(embed).then(msg => {
-                    (msg as any).delete(5000);
-                });
-                */
+                if(message.channel.type !== "dm"){
+                    this._xpHandler.IncreaseXpOnMessage(message);
+                    let ticketCategory = message.guild.channels.find('name', 'Tickets') as discord.CategoryChannel;
+                    if ((message.channel as discord.TextChannel).parent == ticketCategory) {
+                        this._messageService.HandleMessageInTicketCategory(message);
+                    }
+                    else {
+                        for (const cmd of this._commands) {
+                            try {
+                                if (cmd.isValid(text)) {
+                                    const answer = new BotMessage(message.author);
+                                    await cmd.process(text, answer, message, this._client, this._config, this._commands, this._websiteBotService, this._server)
+                                    if (this._config.idiotAnswer) {
+                                        answer.setTextOnly(this._config.idiotAnswer)
+                                    }
+                                    if (answer.isValid()) {
+                                        message.channel.send(answer.text || { embed: answer.richText })
+                                            .then(console.log)
+                                            .catch(console.error);
+                                    }
+                                    break
+                                }
+                            } catch (ex) {
+                                this._logger.error(ex)
+                                return
+                            }
+                        }
+                    }
+                    return;
+                }
                 for (const cmd of this._commands) {
                     try {
                         if (cmd.isValid(text)) {
                             const answer = new BotMessage(message.author);
-                            if (!this._config.idiots || !this._config.idiots.includes(message.author.id)) {
-                                await cmd.process(text, answer, message, this._client, this._config, this._commands, this._websiteBotService)
-                            } else {
-                                if (this._config.idiotAnswer) {
-                                    answer.setTextOnly(this._config.idiotAnswer)
-                                }
+                            await cmd.process(text, answer, message, this._client, this._config, this._commands, this._websiteBotService, this._server)
+                            if (this._config.idiotAnswer) {
+                                answer.setTextOnly(this._config.idiotAnswer)
                             }
                             if (answer.isValid()) {
                                 message.channel.send(answer.text || { embed: answer.richText })
@@ -149,6 +180,7 @@ export class Bot implements IBot {
                 }
             }
         })
+
         this._client.login(this._config.token)
     }
 
