@@ -13,8 +13,10 @@ export class xpHandler {
         this._config = config;
     }
 
+    private baseUrl = 'https://api.dapperdino.co.uk/api/xp/';
+
     public async IncreaseXpOnMessage(message: discord.Message) {
-        let userXpURL = 'https://api.dapperdino.co.uk/api/xp/' + message.author.id;
+        let userXpURL = this.baseUrl + message.author.id;
 
         let xpObject: postXp = new postXp();
         let xpValue = Math.floor(Math.random() * 10) + 5;
@@ -26,7 +28,7 @@ export class xpHandler {
     }
 
     public async IncreaseXp(message: discord.Message, xp: number) {
-        let userXpURL = 'https://api.dapperdino.co.uk/api/xp/' + message.author.id;
+        let userXpURL = this.baseUrl +  message.author.id;
 
         let xpObject: postXp = new postXp();
         xpObject.xp = xp;
@@ -37,7 +39,7 @@ export class xpHandler {
     }
 
     public async IncreaseXpDefault(discordId:string, xp:number){
-        let userXpURL = 'https://api.dapperdino.co.uk/api/xp/' + discordId;
+        let userXpURL = this.baseUrl +  discordId;
 
         let xpObject: compactPostXp = new compactPostXp();
         xpObject.xp = xp;
@@ -46,22 +48,28 @@ export class xpHandler {
     }
 
     public async GetLevelData() {
-        let xpUrl = 'https://api.dapperdino.co.uk/api/xp'
 
-        new apiRequestHandler().requestAPI("GET", null, xpUrl, this._config)
+        new apiRequestHandler().requestAPI("GET", null, this.baseUrl, this._config)
             .then((xpArray) => {
                 console.log(xpArray);
             });
     }
 
     public async getLevelDataById(discordId: number) {
-        return new Promise<receiveXp>(async (resolve, reject) => {
-            let xpUrl = `https://api.dapperdino.co.uk/api/xp/${discordId}`
 
-            new apiRequestHandler().requestAPI("GET", null, xpUrl, this._config)
+        // Return new Promise<receiveXp>
+        return new Promise<receiveXp>(async (resolve, reject) => {
+
+            // Create xp url
+            let xpUrl = `${this.baseUrl}${discordId}`
+
+            // Request API
+            new apiRequestHandler()
+                .requestAPIWithType<receiveXp>("GET", null, xpUrl, this._config)
                 .then((xpReturnObject) => {
-                    let xpReturn = JSON.parse(xpReturnObject.toString())
-                    return resolve(xpReturn as receiveXp);
+                    
+                    // Resolve if all went okay
+                    return resolve(xpReturnObject);
                 });
         })
     }
