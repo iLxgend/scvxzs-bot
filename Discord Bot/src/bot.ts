@@ -62,11 +62,11 @@ export class Bot implements IBot {
             }
             this._client.user.setStatus('online')
             this._logger.info('started...')
-            this._server = this._client.guilds.find("id", this._config.serverId)
-            this._welcomeChannel = this._server.channels.find("name", "welcome") as discord.TextChannel;
-            this._faqChannel = this._server.channels.find("name", "f-a-q") as discord.TextChannel;
-            this._reportChannel = this._server.channels.find("name", "reports") as discord.TextChannel;
-            this._kicksAndBansChannel = this._server.channels.find("name", "kicks-and-bans") as discord.TextChannel;
+            this._server = this._client.guilds.find((guild) => guild.id === this._config.serverId);
+            this._welcomeChannel = this._server.channels.find(channel => channel.name === "welcome") as discord.TextChannel;
+            this._faqChannel = this._server.channels.find(channel => channel.name === "f-a-q") as discord.TextChannel;
+            this._reportChannel = this._server.channels.find(channel => channel.name === "reports") as discord.TextChannel;
+            this._kicksAndBansChannel = this._server.channels.find(channel => channel.name === "kicks-and-bans") as discord.TextChannel;
             this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
             this._websiteBotService.startupService();
             this._apiBotService = new apiBotService(this._client, this._config, this._server);
@@ -112,7 +112,7 @@ export class Bot implements IBot {
             member.send("If you are happy with these rules then feel free to use the server as much as you like. The more members the merrier :D");
             member.send("Use the command '?commands' to recieve a PM with all my commands and how to use them");
             member.send("(I am currently being tested on by my creators so if something goes wrong with me, don't panic, i'll be fixed. That's it from me. I'll see you around :)");
-            member.addRole(member.guild.roles.find("name", "Member"));
+            member.addRole(member.guild.roles.find(role => role.name === "Member"));
         })
 
         this._client.on('guildMemberRemove', async member => {
@@ -128,9 +128,9 @@ export class Bot implements IBot {
             if (message.author.id !== this._botId) {
                 const text = message.cleanContent;
                 this._logger.debug(`[${message.author.tag}] ${text}`);
-                if(message.channel.type !== "dm"){
+                if (message.channel.type !== "dm") {
                     this._xpHandler.IncreaseXpOnMessage(message);
-                    let ticketCategory = message.guild.channels.find('name', 'Tickets') as discord.CategoryChannel;
+                    let ticketCategory = message.guild.channels.find(category => category.name === 'Tickets') as discord.CategoryChannel;
                     if ((message.channel as discord.TextChannel).parent == ticketCategory) {
                         this._messageService.HandleMessageInTicketCategory(message);
                     }

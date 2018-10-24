@@ -22,13 +22,13 @@ export class channelhandler {
         return new Promise<discord.Channel>(async (resolve, reject) => {
 
             //Find the role 'Admin'
-            var adminRole = message.guild.roles.find("name", "Admin");
+            var adminRole = message.guild.roles.find((role) => role.name === "Admin");
 
             //Find the role 'Dapper Bot'
-            var dapperRole = message.guild.roles.find("name", "Dapper Bot");
+            var dapperRole = message.guild.roles.find((role) => role.name ===  "Dapper Bot");
 
             // Find category 'Tickets'
-            var category = message.guild.channels.find('name', 'Tickets') as discord.CategoryChannel;
+            var category = message.guild.channels.find((role) => role.name === 'Tickets') as discord.CategoryChannel;
 
             // Add category if not existing
             if (!category) await message.guild.createChannel('Tickets', 'category').then(p => category = p as discord.CategoryChannel);
@@ -107,7 +107,7 @@ export class channelhandler {
     public async addPermissionsToChannelTicketCommand(ticketId: number, message: discord.Message, embed: discord.RichEmbed) {
 
         // Find channel based on ticketId
-        var channel = this._guild.channels.find('name', `ticket${ticketId}`);
+        var channel = this._guild.channels.find((channel) => channel.name === `ticket${ticketId}`);
 
         // If channel is found
         if (channel) {
