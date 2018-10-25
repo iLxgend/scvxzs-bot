@@ -23,6 +23,9 @@ export default class acceptTicketCommand implements IBotCommand {
 
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], wbs:websiteBotService, guild: discord.Guild): Promise<void> {
 
+        // Make sure that the user has the Happy To Help role
+        if(!message.member.roles.find(role => role.name === "Happy To Help")) return;
+
         // Create new compactDiscordUser that's sent to the API
         let user: compactDiscordUser = new compactDiscordUser();
 
