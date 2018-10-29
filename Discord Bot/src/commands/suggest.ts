@@ -72,7 +72,7 @@ export default class SuggestCommand implements IBotCommand {
 
         let collectedInfo;
         //datacallback
-
+/*
         let suggestionCategoryStep: dialogueStep = new dialogueStep(
             "Enter the category that best suits your suggestion. Choose from 'Bot', 'Website', 'General' or 'Youtube'.", 
             "Type Successful", 
@@ -109,6 +109,6 @@ export default class SuggestCommand implements IBotCommand {
             .addField("Your request has been added to Dapper's video ideas list", "Thanks for your contribution", false)
             .setFooter("Sit tight and I might get around to your idea... eventually :D")
             
-        message.channel.send(suggestionEmbed);
+        message.channel.send(suggestionEmbed);*/
     }
 }

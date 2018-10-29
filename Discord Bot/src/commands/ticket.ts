@@ -36,7 +36,7 @@ export default class TicketCommand implements IBotCommand {
     }
 
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], wbs:websiteBotService, guild:discord.Guild): Promise<void> {
-
+/*
         this._guild = guild;
 
         // Array of collected info
@@ -140,5 +140,6 @@ export default class TicketCommand implements IBotCommand {
             });
 
         return data;
-    };
+    };*/
+}
 }

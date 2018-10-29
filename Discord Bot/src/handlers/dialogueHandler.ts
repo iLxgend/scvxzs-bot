@@ -1,88 +1,83 @@
 import * as discord from 'discord.js'
 import * as api from '../api'
 
-export class dialogueHandler {
-    private _steps: dialogueStep[] | dialogueStep;
-    private _data: any;
-    private _endEarly: boolean;
+export class dialogueHandler<T> {
+    private _steps: dialogueStep<T>[] | dialogueStep<T>;
+    private _data: T;
 
     /**
      *
      */
-    constructor(steps: dialogueStep[] | dialogueStep, data: any) {
+    constructor(steps: dialogueStep<T>[] | dialogueStep<T>, data: T) {
         this._steps = steps;
         this._data = data;
-        this._endEarly = false;
-        
     }
 
-    public async getInput(channel: discord.TextChannel, user: discord.GuildMember, config: api.IBotConfig) {
-        // Create array for single dialogueStep to prevent extra checks + coding
-        if (!Array.isArray(this._steps)) {
-            this._steps = [this._steps];
-        }
-        for (const step of this._steps) {
-            const filter = m => (m.member == user);
-            
-            let response, beforeM;
+    public async getInput(channel: discord.TextChannel, user: discord.GuildMember, config: api.IBotConfig): Promise<T> {
 
-            channel.send(user + ", " + step.beforeMessage).then(newMsg =>{
-                beforeM = newMsg;
-            });
+        return new Promise<T>(async (resolve, reject) => {
 
-            await channel.awaitMessages(filter, { max:  1})
-                .then(collected => {
-                    response = collected.array()[0];
+            // Create array for single dialogueStep to prevent extra checks + coding
+            if (!Array.isArray(this._steps)) {
 
-                    if (step.callback != null){
-                         [this._data, this._endEarly] = step.callback(response.content, this._data, this._endEarly);
-   
-                    }
-
-                    if (step.httpCallback != null){
-                        this._data = step.httpCallback(response.content, this._data, user, config);
-                    }
-
-                    console.log("DH " + this._endEarly)
-
-                    //channel.send(step.succeedMessage).then(newMsg =>{
-                    //    (newMsg as any).delete(1000);
-                    //});
-                })
-                .catch(collected => {
-                    console.log(console.error(collected))
-                    channel.send(step.errorMessage);
-                });
-            beforeM.delete(0);
-            response.delete(0);
-            if(this._endEarly == true){
-                return this._data;
+                // Transform to array
+                this._steps = [this._steps];
             }
-        }
 
-        return this._data;
+            // Loop over each step
+            for (const step of this._steps) {
 
+                // Filter for current user
+                const filter = m => (m.member == user);
+
+
+                let response, beforeM;
+
+                channel.send(user + ", " + step.beforeMessage).then(newMsg => {
+                    beforeM = newMsg;
+                });
+
+                channel.awaitMessages(filter, { max: 1 })
+                    .then(collected => {
+                        response = collected.array()[0];
+
+                        step.callback(response, step.stepData)
+                        .then(e => {
+                            console.log(e);
+                        })
+                            .catch(e => {
+                                console.error(e)
+                            });
+                        beforeM.delete(0);
+                        response.delete(0);
+                    })
+                    .catch(collected => {
+                        console.log(console.error(collected))
+                        channel.send(step.errorMessage);
+                    });
+            }
+
+            return this._data;
+        });
     }
 }
 
-export class dialogueStep implements dialogueStep {
+export class dialogueStep<E> implements dialogueStep<E> {
     /**
      *
      */
-    constructor(beforeMessage: string, succeedMessage?: string, errorMessage?: string, callback?: Function, httpCallback?: Function, editMessage?:Function) {
-        this.callback = callback;
-        this.httpCallback = httpCallback;
+    constructor(stepData: E, callback: (response: string, data: E) => Promise<E>, beforeMessage: string, succeedMessage?: string, errorMessage?: string) {
         this.beforeMessage = beforeMessage;
         this.succeedMessage = succeedMessage;
         this.errorMessage = errorMessage;
-        this.editMessage = editMessage;
+        this.callback = callback;
+        this.stepData = stepData;
     }
 }
 
-export interface dialogueStep {
-    callback?: Function;
-    httpCallback?: Function;
-    editMessage?:Function;
+export interface dialogueStep<E> {
+    callback: (response: string, data: E) => Promise<E>;
+    stepData: E;
     beforeMessage: string;
     succeedMessage?: string;
     errorMessage?: string;

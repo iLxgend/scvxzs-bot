@@ -23,11 +23,17 @@ export default class acceptTicketCommand implements IBotCommand {
 
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], wbs:websiteBotService, guild: discord.Guild): Promise<void> {
 
+        // Get member from guild
+        let member = client.guilds.first().members.find(member => member.id === message.author.id);
+
+        // Check if member exists in guild
+        if (member == null ) return;
+
         // Make sure that the user has the Happy To Help role
-        if(!message.member.roles.find(role => role.name === "Happy To Help")) return;
+        if(!member.roles.find(role => role.name === "Happy To Help")) return; 
 
         // Create new compactDiscordUser that's sent to the API
-        let user: compactDiscordUser = new compactDiscordUser();
+        let user: compactDiscordUser = new compactDiscordUser(); 
 
         // Fill properties
         user.discordId = message.author.id;
@@ -47,7 +53,7 @@ export default class acceptTicketCommand implements IBotCommand {
 
                 // Create ticket embed
                 let ticketEmbed = new discord.RichEmbed()
-                    .setTitle(`You've successfully been added to ticket ${messageContent.split(' ')[1]}`)
+                    .setTitle(`You're added to ${messageContent.split(' ')[1]}`)
                     .setDescription(receivedTicket.subject)
                     .addField(receivedTicket.subject, receivedTicket.description)
                     .setColor("#2dff2d");
