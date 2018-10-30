@@ -182,7 +182,7 @@ export class Bot implements IBot {
         this._client.on('message', async (message) => {
 
             // Make sure that the bot isn't responding to itself
-            if (message.author.id !== this._botId) {
+            if (message.author.id === this._botId) {
                 return;
             }
 
@@ -227,7 +227,7 @@ export class Bot implements IBot {
 
                 // Validate cmd regex, if not valid, go to the next cmd
                 if (!cmd.isValid(text)) {
-                    break;
+                    continue;
                 }
 
                 // Create new bot message for our response

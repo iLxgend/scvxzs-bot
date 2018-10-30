@@ -37,7 +37,7 @@ export class dialogueHandler<T> {
                     beforeM = newMsg;
                 });
 
-                channel.awaitMessages(filter, { max: 1 })
+                await channel.awaitMessages(filter, { max: 1 })
                     .then(collected => {
                         response = collected.array()[0];
 
