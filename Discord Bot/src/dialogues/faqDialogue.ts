@@ -14,24 +14,26 @@ export class faqDialogue {
     private _config: api.IBotConfig;
     private _channel: discord.TextChannel;
     private _user: discord.GuildMember;
+    private _bot: discord.Client;
 
     /**
      * Create dialogue for faq
      */
-    constructor(config: api.IBotConfig, channel:discord.TextChannel, user:discord.GuildMember) {
+    constructor(config: api.IBotConfig, channel:discord.TextChannel, user:discord.GuildMember, bot:discord.Client) {
         this._config = config;
         this._channel=channel;
         this._user = user;
+        this._bot = bot;
     }
     
     
-    public addQuestion = (response: string, data: faq): Promise<faq> => {
+    public addQuestion = (response: discord.Message, data: faq): Promise<faq> => {
 
         return new Promise<faq>((resolve, reject) => {
 
             try {
 
-                data.question = response;
+                data.question = response.content;
 
                 return resolve(data);
 
@@ -43,12 +45,12 @@ export class faqDialogue {
         });
     };
 
-    public addAnswer = (response: string, data: faq): Promise<faq> => {
+    public addAnswer = (response: discord.Message, data: faq): Promise<faq> => {
         return new Promise<faq>((resolve, reject) => {
 
             try {
 
-                data.answer = response;
+                data.answer = response.content;
 
                 return resolve(data);
 
@@ -59,7 +61,7 @@ export class faqDialogue {
         });
     };
 
-    public addFaqUrl = (response: string, data: faq): Promise<faq> => {
+    public addFaqUrl = (response: discord.Message, data: faq): Promise<faq> => {
         return new Promise<faq>((resolve, reject) => {
 
             try {
@@ -68,7 +70,7 @@ export class faqDialogue {
                     data.resourceLink = new resourceLink();
                 }
 
-                data.resourceLink.link = response;
+                data.resourceLink.link = response.content;
 
                 return resolve(data);
 
@@ -80,12 +82,12 @@ export class faqDialogue {
 
     };
 
-    public addFaqUrlMask = (response: string, data: faq): Promise<faq> => {
+    public addFaqUrlMask = (response: discord.Message, data: faq): Promise<faq> => {
         return new Promise<faq>((resolve, reject) => {
 
             try {
 
-                data.resourceLink.displayName = response;
+                data.resourceLink.displayName = response.content;
 
                 return resolve(data);
 
@@ -96,24 +98,22 @@ export class faqDialogue {
         });
     };
 
-    public startUsefulResource = (response: string, data:faq ): Promise<faq> => {
+    public startUsefulResource = (response: discord.Message, data:faq ): Promise<faq> => {
         return new Promise<faq>(async (resolve, reject) => {
             let yeses = ["yes", "yea", "yeah", "ye", "y"];
 
-            if (yeses.find(yes => response.toString().toLowerCase() == yes)) {
+            if (yeses.find(yes => response.content == yes)) {
 
                 let faqUrlStep: dialogueStep<faq> = new dialogueStep(data, this.addFaqUrl, "Enter URL:", "URL Successful", "URL Unsuccessful");
                 let faqUrlMaskStep: dialogueStep<faq> = new dialogueStep(data, this.addFaqUrlMask, "Enter URL Mask:", "URL Mask Successful", "URL Mask Unsuccessful");
                 let handler: dialogueHandler<faq> = new dialogueHandler<faq>([faqUrlStep, faqUrlMaskStep], data);
-
-                return await handler.getInput(this._channel, this._user, this._config)
-                    .then(d => { return resolve(d);})
-                    .catch(reject);
+        
+                return resolve(await handler.getInput(this._channel, this._user, this._config));
             }
         });
     }
 
-    public finalizeSteps = (data: faq, ticketuser: any) => {
+    public finalizeSteps = (data: faq) => {
         
         let faqEmbed = new discord.RichEmbed()
             .setTitle("-Q: " + data.question)
@@ -125,11 +125,18 @@ export class faqDialogue {
             new faqHandler(this._config)
             .addFaq(data)
                 .then(faqData => {
-                    ((ticketuser as discord.GuildMember).guild.channels.get("461486560383336458") as discord.TextChannel)
+
+                    
+                    let guild = this._bot.guilds.get(this._config.serverId);
+                    if(guild == null) return;
+                    (guild.channels.find((channel) => channel.name=== "f-a-q") as discord.TextChannel)
                         .send(faqEmbed)
                         .then(newMsg => {
                             this.setFaqMessageId((newMsg as discord.Message).id, faqData.id);
                         });
+                })
+                .catch(err=> {
+                    console.error(err);
                 })
         
 

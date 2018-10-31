@@ -57,7 +57,7 @@ export default class TicketCommand implements IBotCommand {
         // Create description step
         let descriptionStep: dialogueStep<ticketDialogueData> = new dialogueStep(
             collectedInfo,
-            d.titleStep,
+            d.descriptionStep,
             "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with:",
             "Description Successful",
             "Description Unsuccessful",);

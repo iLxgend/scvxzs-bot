@@ -20,10 +20,10 @@ export class suggestionDialogue {
     /**
      * addCategory
      */
-    public addCategory(response: string, data: suggestionDialogueData) {
+    public addCategory(response: any, data: suggestionDialogueData) {
         return new Promise<suggestionDialogueData>((resolve, reject) => {
             try {
-                data.category = response;
+                data.category = response.content;
                 return resolve(data);
             } catch (e) {
                 return reject(e);

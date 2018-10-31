@@ -38,13 +38,13 @@ export class dialogueHandler<T> {
                 });
 
                 await channel.awaitMessages(filter, { max: 1 })
-                    .then(collected => {
+                    .then(async collected => {
                         response = collected.array()[0];
 
-                        step.callback(response, step.stepData)
-                        .then(e => {
-                            console.log(e);
-                        })
+                        await step.callback(response, step.stepData)
+                            .then(e => {
+                                this._data=e;
+                            })
                             .catch(e => {
                                 console.error(e)
                             });
@@ -57,7 +57,7 @@ export class dialogueHandler<T> {
                     });
             }
 
-            return this._data;
+            return resolve(this._data);
         });
     }
 }
@@ -66,7 +66,7 @@ export class dialogueStep<E> implements dialogueStep<E> {
     /**
      *
      */
-    constructor(stepData: E, callback: (response: string, data: E) => Promise<E>, beforeMessage: string, succeedMessage?: string, errorMessage?: string) {
+    constructor(stepData: E, callback: (response: any, data: E) => Promise<E>, beforeMessage: string, succeedMessage?: string, errorMessage?: string) {
         this.beforeMessage = beforeMessage;
         this.succeedMessage = succeedMessage;
         this.errorMessage = errorMessage;

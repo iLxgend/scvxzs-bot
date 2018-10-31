@@ -18,7 +18,8 @@ export default class AddFaqCommand implements IBotCommand {
         return { caption: '?addfaq', description: 'ADMIN ONLY - Creates a new entry to the FAQ channel, follow the prompts' }
     }
 
-    public init(bot: IBot, dataPath: string): void { }
+    public init(bot: IBot, dataPath: string): void {
+     }
 
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
@@ -31,7 +32,7 @@ export default class AddFaqCommand implements IBotCommand {
         }
 
         let faqModel = new faq();
-        let dialogue = new faqDialogue(config, message.channel as discord.TextChannel, message.member);
+        let dialogue = new faqDialogue(config, message.channel as discord.TextChannel, message.member, client);
 
         let questionStep: dialogueStep<faq> = new dialogueStep<faq>(
             faqModel,
@@ -61,11 +62,7 @@ export default class AddFaqCommand implements IBotCommand {
         .getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig)
         .then((faq) => {
             
-            // Add to db using API, send embed
-            dialogue.finalizeSteps(faq, message.member);
-
-            // send embed
-            console.log();
+            dialogue.finalizeSteps(faq)
         });
 
         message.delete(0);

@@ -49,7 +49,7 @@ export default class SuggestCommand implements IBotCommand {
 
         let suggestionStep: dialogueStep<suggestionDialogueData> = new dialogueStep(
             collectedInfo,
-            dialogue.addCategory,
+            dialogue.addDescription,
             "Enter your suggestion:", 
             "Suggestion Successful", 
             "Suggestion Unsuccessful");
