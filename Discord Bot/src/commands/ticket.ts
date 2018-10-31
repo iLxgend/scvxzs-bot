@@ -50,7 +50,7 @@ export default class TicketCommand implements IBotCommand {
         let titleStep: dialogueStep<ticketDialogueData> = new dialogueStep(
             collectedInfo,
             d.titleStep,
-            "Enter a title for your ticket, quickly summarise the problem that you are having:",
+            "Enter a title for your ticket that quickly summarises what you are requiring assistance with:",
             "Title Successful",
             "Title Unsuccessful");
 

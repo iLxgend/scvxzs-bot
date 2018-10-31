@@ -1,5 +1,5 @@
 export interface email {
-    Email: string;
+    email: string;
 }
 
 export class email implements email {

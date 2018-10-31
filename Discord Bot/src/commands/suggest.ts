@@ -71,7 +71,7 @@ export default class SuggestCommand implements IBotCommand {
                     .setTitle("Thank You For Leaving A Suggestion")
                     .setColor("#ff0000")
                     .addField(message.author.username, "Suggested Dapper Dino to: " + data.description, false)
-                    .addField("Your request has been added to Dapper's video ideas list", "Thanks for your contribution", false)
+                    .addField("Your request has been added to Dapper's suggestions list", "Thanks for your contribution", false)
                     .setFooter("Sit tight and I might get around to your idea... eventually :D")
                     
                 message.channel.send(suggestionEmbed);

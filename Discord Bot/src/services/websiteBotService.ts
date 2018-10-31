@@ -206,7 +206,7 @@ export class websiteBotService {
         let emailObject = new email();
 
         // Add email address to it
-        emailObject.Email = emailAddress;
+        emailObject.email = emailAddress;
 
         // Get response from api
         let responseData = new apiRequestHandler().requestAPI("POST", emailObject, "https://dapperdinoapi.azurewebsites.net/api/search/user", this._config);

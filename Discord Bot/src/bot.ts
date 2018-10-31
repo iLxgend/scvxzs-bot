@@ -205,7 +205,7 @@ export class Bot implements IBot {
                 if ((message.channel as discord.TextChannel).parent == ticketCategory) {
 
                     // Handle messages for tickets
-                    this._messageService.HandleMessageInTicketCategory(message);
+                    this._messageService.handleMessageInTicketCategory(message);
                     return;
                 }
             }
