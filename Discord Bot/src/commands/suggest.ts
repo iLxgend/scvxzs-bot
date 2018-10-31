@@ -66,7 +66,7 @@ export default class SuggestCommand implements IBotCommand {
                     console.log('Updated!');
                 })
                 message.delete(0);
-        
+                dialogue.handleAPI(data);
                 let suggestionEmbed = new discord.RichEmbed()
                     .setTitle("Thank You For Leaving A Suggestion")
                     .setColor("#ff0000")

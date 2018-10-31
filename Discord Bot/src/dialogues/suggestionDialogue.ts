@@ -45,7 +45,7 @@ export class suggestionDialogue {
         });
     }
 
-    private httpFunc = (data: suggestionDialogueData) => {
+    public handleAPI = (data: suggestionDialogueData) => {
 
         // Create new suggestion
         let suggestion:suggest = new suggest();
@@ -76,7 +76,7 @@ export class suggestionDialogue {
                 suggestion.type = SuggestionTypes.Undecided;
         }
 
-        new apiRequestHandler().requestAPI('POST', suggestion, 'https://api.dapperdino.co.uk/api/suggestion', this._config);
+        new apiRequestHandler().requestAPIWithType<suggest>('POST', suggestion, 'https://api.dapperdino.co.uk/api/suggestion', this._config);
 
         return data;
     };
