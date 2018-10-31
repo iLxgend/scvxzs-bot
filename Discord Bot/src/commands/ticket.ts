@@ -46,7 +46,7 @@ export default class TicketCommand implements IBotCommand {
         // Add message object for later use in apiCall
         this.setMessage(message);
         let d = new ticketDialogue();
-        // Create title step
+        // Create category step
         let titleStep: dialogueStep<ticketDialogueData> = new dialogueStep(
             collectedInfo,
             d.titleStep,

@@ -56,24 +56,26 @@ export default class SuggestCommand implements IBotCommand {
         
         let handler = new dialogueHandler([suggestionCategoryStep, suggestionStep], collectedInfo);
 
-        collectedInfo = await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig);
-
-        fs.appendFile('../suggestions.txt', "ID: " + message.author + ", Username: " + message.author.username + ", Suggestion: " + collectedInfo[1] + "\n", function(err){
-            if(err)
-            {
-                throw err;
+        await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig).then(data => {
+            if(data != null){
+                fs.appendFile('../suggestions.txt', "ID: " + message.author + ", Username: " + message.author.username + ", Suggestion: " + data.description + "\n", function(err){
+                    if(err)
+                    {
+                        throw err;
+                    }
+                    console.log('Updated!');
+                })
+                message.delete(0);
+        
+                let suggestionEmbed = new discord.RichEmbed()
+                    .setTitle("Thank You For Leaving A Suggestion")
+                    .setColor("#ff0000")
+                    .addField(message.author.username, "Suggested Dapper Dino to: " + data.description, false)
+                    .addField("Your request has been added to Dapper's video ideas list", "Thanks for your contribution", false)
+                    .setFooter("Sit tight and I might get around to your idea... eventually :D")
+                    
+                message.channel.send(suggestionEmbed);
             }
-            console.log('Updated!');
-        })
-        message.delete(0);
-
-        let suggestionEmbed = new discord.RichEmbed()
-            .setTitle("Thank You For Leaving A Suggestion")
-            .setColor("#ff0000")
-            .addField(message.author.username, "Suggested Dapper Dino to: " + collectedInfo[1], false)
-            .addField("Your request has been added to Dapper's video ideas list", "Thanks for your contribution", false)
-            .setFooter("Sit tight and I might get around to your idea... eventually :D")
-            
-        message.channel.send(suggestionEmbed);
+        });
     }
 }
