@@ -8,7 +8,7 @@ import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 import { faqMessage } from '../models/faq/faqMessage';
 import { faqHandler } from '../handlers/faqHandler';
 import * as api from '../api'
-import { faqDialogue, dialogueData } from "../dialogues/faqDialogue";
+import { faqDialogue } from "../dialogues/faqDialogue";
 
 export default class AddFaqCommand implements IBotCommand {
 
@@ -47,9 +47,6 @@ export default class AddFaqCommand implements IBotCommand {
             "Answer Successful",
             "Answer Unsuccessful");
 
-        let urlverify = new dialogueData();
-        urlverify.channel = message.channel as discord.TextChannel;
-
         let faqUrlVerifyStep: dialogueStep<faq> = new dialogueStep(
             faqModel,
             dialogue.startUsefulResource,
@@ -60,8 +57,12 @@ export default class AddFaqCommand implements IBotCommand {
 
         let handler = new dialogueHandler([questionStep, answerStep, faqUrlVerifyStep], faqModel);
 
-        await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig).then((faq) => {
-
+        await handler
+        .getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig)
+        .then((faq) => {
+            
+            // Add to db using API, send embed
+            dialogue.finalizeSteps(faq, message.member);
 
             // send embed
             console.log();

@@ -7,6 +7,8 @@ import { discordUser } from '../models/discordUser';
 import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { dialogueStep, dialogueHandler } from '../handlers/dialogueHandler';
 import { compactDiscordUser } from '../models/compactDiscordUser';
+import { suggestionDialogueData, suggestionDialogue } from '../dialogues/suggestionDialogue';
+import { ticketDialogueData } from '../dialogues/ticketDialogue';
 
 export default class SuggestCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?suggest/im
@@ -31,63 +33,26 @@ export default class SuggestCommand implements IBotCommand {
         console.log(data.join(", "))
         return [data, endEarly];
     };
-
-    private httpFunc = (response: any, data: any, ticketuser: any, config: any) => {
-
-        // Create new suggestion
-        let suggestObject:suggest = new suggest();
-
-        // Set description
-        suggestObject.Description = data[1];
-
-        // Add discord user information to the suggestion
-        suggestObject.DiscordUser = new discordUser();
-        suggestObject.DiscordUser.username = ticketuser.displayName;
-        suggestObject.DiscordUser.discordId = ticketuser.id;
-
-        // Select suggestion type
-        switch(data[0].toLowerCase()){
-            case "bot":
-                suggestObject.Type = SuggestionTypes.Bot;
-                break;
-            case "website":
-                suggestObject.Type = SuggestionTypes.Website;
-                break;
-            case "general":
-                suggestObject.Type = SuggestionTypes.General;
-                break;
-            case "youtube":
-                suggestObject.Type = SuggestionTypes.Youtube;
-                break;
-            default:
-                suggestObject.Type = SuggestionTypes.Undecided;
-        }
-
-        new apiRequestHandler().requestAPI('POST', suggestObject, 'https://api.dapperdino.co.uk/api/suggestion', config);
-
-        return data;
-    };
     
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
 
-        let collectedInfo;
-        //datacallback
-/*
-        let suggestionCategoryStep: dialogueStep = new dialogueStep(
+        let collectedInfo:suggestionDialogueData= new suggestionDialogueData();
+        let dialogue:suggestionDialogue = new suggestionDialogue(message, config);
+
+        let suggestionCategoryStep: dialogueStep<suggestionDialogueData> = new dialogueStep(
+            collectedInfo,
+            dialogue.addCategory,
             "Enter the category that best suits your suggestion. Choose from 'Bot', 'Website', 'General' or 'Youtube'.", 
             "Type Successful", 
-            "Type Unsuccessful",
-            this.cbFunc, 
-            collectedInfo
+            "Type Unsuccessful"
             );
 
-        let suggestionStep: dialogueStep = new dialogueStep(
+        let suggestionStep: dialogueStep<suggestionDialogueData> = new dialogueStep(
+            collectedInfo,
+            dialogue.addCategory,
             "Enter your suggestion:", 
             "Suggestion Successful", 
-            "Suggestion Unsuccessful",
-            this.cbFunc, 
-            this.httpFunc, 
-            collectedInfo);
+            "Suggestion Unsuccessful");
         
         let handler = new dialogueHandler([suggestionCategoryStep, suggestionStep], collectedInfo);
 
@@ -109,6 +74,6 @@ export default class SuggestCommand implements IBotCommand {
             .addField("Your request has been added to Dapper's video ideas list", "Thanks for your contribution", false)
             .setFooter("Sit tight and I might get around to your idea... eventually :D")
             
-        message.channel.send(suggestionEmbed);*/
+        message.channel.send(suggestionEmbed);
     }
 }

@@ -9,6 +9,7 @@ import { dialogueHandler, dialogueStep } from '../handlers/dialogueHandler';
 import { ticketReceive } from '../models/ticket/ticketReceive';
 import { channelhandler } from '../handlers/channelHandler';
 import { websiteBotService } from '../services/websiteBotService';
+import { ticketDialogueData, ticketDialogue } from '../dialogues/ticketDialogue';
 
 export default class TicketCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?ticket/im
@@ -36,66 +37,58 @@ export default class TicketCommand implements IBotCommand {
     }
 
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], wbs:websiteBotService, guild:discord.Guild): Promise<void> {
-/*
+
         this._guild = guild;
 
         // Array of collected info
-        let collectedInfo;
+        let collectedInfo = new ticketDialogueData();
         
         // Add message object for later use in apiCall
         this.setMessage(message);
-
+        let d = new ticketDialogue();
         // Create title step
-        let titleStep: dialogueStep = new dialogueStep(
+        let titleStep: dialogueStep<ticketDialogueData> = new dialogueStep(
+            collectedInfo,
+            d.titleStep,
             "Enter a title for your ticket, quickly summarise the problem that you are having:",
             "Title Successful",
-            "Title Unsuccessful",
-            this.callback,
-            collectedInfo);
+            "Title Unsuccessful");
 
         // Create description step
-        let descriptionStep: dialogueStep = new dialogueStep(
+        let descriptionStep: dialogueStep<ticketDialogueData> = new dialogueStep(
+            collectedInfo,
+            d.titleStep,
             "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with:",
             "Description Successful",
-            "Description Unsuccessful",
-            this.callback,
-            this.apiCall,
-            collectedInfo);
+            "Description Unsuccessful",);
 
         // Create new dialogueHandler with a titleStep and descriptionStep
         let handler = new dialogueHandler([titleStep, descriptionStep], collectedInfo);
 
         // Collect info from steps
-        collectedInfo = await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig);
+        await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig)
+        .then(data => {
 
-        // Create ticket embed
-        let ticketEmbed = new discord.RichEmbed()
+            //API CALL
+            this.apiCall(data, message.member, config);
+
+            // Create ticket embed
+            let ticketEmbed = new discord.RichEmbed()
             .setTitle("Ticket Created Successfully!")
             .setColor('#ffdd05')
-            .addField("Your Title:", collectedInfo[0], false)
-            .addField("Your Description:", collectedInfo[1], false)
+            .addField("Your Title:", data.title, false)
+            .addField("Your Description:", data.description, false)
             .setFooter("Thank you for subitting a ticket " + message.author.username + ". We'll try to get around to it as soon as possible, please be patient.")
 
-        // Delete command message
-        message.delete(0);
+            // Delete command message
+            message.delete(0);
 
-        // Send ticketEmbed 
-        message.channel.send(ticketEmbed);
+            // Send ticketEmbed 
+            message.channel.send(ticketEmbed);
+        });
     }
 
-    // Default callback handler
-    callback = (response: any, data: any, endEarly: any) => {
-        if (data == null) {
-            data = new Array<string>(response);
-        }
-        else {
-            data.push(response);
-        }
-        console.log(data.join(", "))
-        return [data, endEarly];
-    };
-
-    apiCall = (response: any, data: any, ticketuser: any, config: any) => {
+    apiCall = (data: ticketDialogueData, ticketuser: any, config: any) => {
 
         // Create new ticket object
         let ticketObject: ticket = new ticket();
@@ -104,8 +97,8 @@ export default class TicketCommand implements IBotCommand {
         ticketObject.applicant = new applicant()
 
         // Fill properties of ticket
-        ticketObject.subject = data[0];
-        ticketObject.description = data[1];
+        ticketObject.subject = data.title;
+        ticketObject.description = data.description;
 
         // Fill properties of applicant
         ticketObject.applicant.username = ticketuser.displayName;
@@ -140,6 +133,5 @@ export default class TicketCommand implements IBotCommand {
             });
 
         return data;
-    };*/
-}
+    };
 }

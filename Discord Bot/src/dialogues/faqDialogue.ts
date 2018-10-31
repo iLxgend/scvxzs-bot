@@ -113,7 +113,7 @@ export class faqDialogue {
         });
     }
 
-    private httpFunc = (data: faq, ticketuser: any) => {
+    public finalizeSteps = (data: faq, ticketuser: any) => {
         
         let faqEmbed = new discord.RichEmbed()
             .setTitle("-Q: " + data.question)
@@ -143,14 +143,4 @@ export class faqDialogue {
 
         new apiRequestHandler().requestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', this._config)
     }
-}
-
-export interface dialogueData {
-    faq: faq, 
-    channel: discord.TextChannel, 
-    user: discord.GuildMember, 
-    config: api.IBotConfig
-}
-
-export class dialogueData implements dialogueData {
 }
