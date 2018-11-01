@@ -1,4 +1,5 @@
 import * as discord from 'discord.js';
+import { validationError } from '../errors';
 
 
 export class ticketDialogue {
@@ -10,6 +11,11 @@ export class ticketDialogue {
 
         return new Promise<ticketDialogueData>((resolve, reject) => {
             try {
+
+                if(response.content.length > 100) {
+                    return reject( new validationError("Title may not exceed 100 characters") );
+                } 
+
                 data.title = response.content;
                 return resolve(data);
             } catch(e) {
@@ -25,6 +31,11 @@ export class ticketDialogue {
 
         return new Promise<ticketDialogueData>((resolve, reject) => {
             try {
+
+                if(response.content.length > 700) {
+                    return reject( new validationError("Description may not exceed 700 characters.") );
+                } 
+
                 data.description = response.content;
                 return resolve(data);
             } catch(e) {

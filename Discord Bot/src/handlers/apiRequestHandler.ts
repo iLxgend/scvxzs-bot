@@ -57,6 +57,11 @@ export class apiRequestHandler {
             return await request(options, (error: any, response: any, body: any) => {
                 console.log(response.statusCode);
                 if (!error && response.statusCode == 200||response.statusCode == 201) {
+                    
+                    if(typeof body == "string") {
+                        return resolve(JSON.parse(body) as T)
+                    }
+
                     return resolve(body as T);
                 }
                 else if (response.statusCode == 401) {

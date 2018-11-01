@@ -22,17 +22,6 @@ export default class SuggestCommand implements IBotCommand {
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
     }
-
-    private cbFunc = (response: any, data: any, endEarly: any) => {
-        if (data == null) {
-            data = new Array<string>(response);
-        }
-        else {
-            data.push(response);
-        }
-        console.log(data.join(", "))
-        return [data, endEarly];
-    };
     
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
 

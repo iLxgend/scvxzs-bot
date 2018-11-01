@@ -102,7 +102,7 @@ export class faqDialogue {
         return new Promise<faq>(async (resolve, reject) => {
             let yeses = ["yes", "yea", "yeah", "ye", "y"];
 
-            if (yeses.find(yes => response.content == yes)) {
+            if (yeses.find(yes => response.content.toLowerCase() == yes)) {
 
                 let faqUrlStep: dialogueStep<faq> = new dialogueStep(data, this.addFaqUrl, "Enter URL:", "URL Successful", "URL Unsuccessful");
                 let faqUrlMaskStep: dialogueStep<faq> = new dialogueStep(data, this.addFaqUrlMask, "Enter URL Mask:", "URL Mask Successful", "URL Mask Unsuccessful");
@@ -110,6 +110,8 @@ export class faqDialogue {
         
                 return resolve(await handler.getInput(this._channel, this._user, this._config));
             }
+
+            return resolve(data);
         });
     }
 

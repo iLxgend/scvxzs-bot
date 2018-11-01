@@ -3,6 +3,7 @@ import { discordUser } from "../models/discordUser";
 import { apiRequestHandler } from "../handlers/apiRequestHandler";
 import * as discord from 'discord.js'; 
 import * as api from "../api";
+import { validationError } from "../errors";
 
 export class suggestionDialogue {
 
@@ -20,10 +21,18 @@ export class suggestionDialogue {
     /**
      * addCategory
      */
-    public addCategory(response: any, data: suggestionDialogueData) {
+    public addCategory(response: discord.Message, data: suggestionDialogueData) {
         return new Promise<suggestionDialogueData>((resolve, reject) => {
             try {
+                const categories = ["bot", "website", "general", "youtube"];
+                
+                let category = response.content.toLowerCase().trim();
+
+                if (!categories.includes(category)) 
+                    return reject(new validationError(`Chosen category did not exist, please choose one out of these options: ${categories.join(", ").trim()}`));
+                
                 data.category = response.content;
+
                 return resolve(data);
             } catch (e) {
                 return reject(e);
