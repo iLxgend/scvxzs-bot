@@ -1,6 +1,7 @@
 import { IBot, IBotCommand, IBotCommandHelp, IBotMessage, IBotConfig } from '../api'
 import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
+import { websiteBotService } from '../services/websiteBotService';
 
 export default class BanCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?ban/im

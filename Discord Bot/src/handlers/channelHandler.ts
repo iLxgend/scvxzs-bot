@@ -1,4 +1,5 @@
 import * as discord from 'discord.js';
+import { ticketDialogueData } from '../dialogues/ticketDialogue';
 
 export class channelhandler {
 
@@ -25,7 +26,7 @@ export class channelhandler {
             var adminRole = message.guild.roles.find((role) => role.name === "Admin");
 
             //Find the role 'Dapper Bot'
-            var dapperRole = message.guild.roles.find((role) => role.name ===  "Dapper Bot");
+            var dapperRole = message.guild.roles.find((role) => role.name === "Dapper Bot");
 
             // Find category 'Tickets'
             var category = message.guild.channels.find((role) => role.name === 'Tickets') as discord.CategoryChannel;
@@ -121,6 +122,25 @@ export class channelhandler {
             });
 
             (channel as discord.TextChannel).send(embed);
+
+            //Create embed for helpers to know that the ticket is closed
+            let inProgressEmbed = new discord.RichEmbed()
+                .setTitle(`Ticket ${ticketId} has been accepted by ${message.member.displayName}!`)
+                .setColor('#ffdd05')
+                .setDescription(`Thank you for your time and efforts :)`)
+
+            //If the user has a profile pic we will set it in the embed
+            if (message.author.avatarURL != null) {
+                inProgressEmbed.setThumbnail(message.author.avatarURL);
+            }
+
+            // Get completed tickets channel
+            let inProgressChannel = this._guild.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
+
+            if (!inProgressChannel) return ("Channel not found");
+
+            //Send the embed to completed tickets channel
+            inProgressChannel.send(inProgressEmbed)
         }
     }
 }

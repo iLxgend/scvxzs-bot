@@ -51,13 +51,6 @@ export default class acceptTicketCommand implements IBotCommand {
                 // Create new ticket model
                 let receivedTicket: ticketReceive = JSON.parse(JSON.stringify(receivedTicketBody)) as ticketReceive;
 
-                // Create ticket embed
-                let ticketEmbed = new discord.RichEmbed()
-                    .setTitle(`You're added to ${messageContent.split(' ')[1]}`)
-                    .setDescription(receivedTicket.subject)
-                    .addField(receivedTicket.subject, receivedTicket.description)
-                    .setColor("#2dff2d");
-
                 let acceptedTicketembed = new discord.RichEmbed()
                     .setTitle(`${message.author.username} is here to help you!`)
                     .setThumbnail(message.author.avatarURL)
@@ -72,9 +65,9 @@ export default class acceptTicketCommand implements IBotCommand {
 
                     // If everything went okay, we finally send the message
                     .then(() => {
-
-                        // Reply to message with our ticketEmbed
-                        message.reply(ticketEmbed);
+                        
+                        //Delete the accept message to keep the channel clean
+                        message.delete(0);
                     })
 
                     .catch(err => {

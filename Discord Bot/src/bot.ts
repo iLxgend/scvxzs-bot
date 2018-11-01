@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import { MissingChannelIdError } from './errors';
 import { messageService } from './services/messageService';
 import { apiBotService } from './services/apiBotService';
+import { channelhandler } from './handlers/channelHandler';
 
 export class Bot implements IBot {
     public get commands(): IBotCommand[] { return this._commands }
@@ -29,6 +30,9 @@ export class Bot implements IBot {
     private _reportChannel!: discord.TextChannel;
     private _kicksAndBansChannel!: discord.TextChannel;
     private _faqChannel!: discord.TextChannel;
+    private _ticketsToAcceptChannel!: discord.TextChannel;
+    private _ticketsInProgressChannel!: discord.TextChannel;
+    private _completedTicketsChannel!: discord.TextChannel;
     private _websiteBotService!: websiteBotService;
     private _apiBotService!: apiBotService;
     private _messageService!: messageService;
@@ -90,6 +94,13 @@ export class Bot implements IBot {
             this._faqChannel = this._server.channels.find(channel => channel.name === "f-a-q") as discord.TextChannel;
             this._reportChannel = this._server.channels.find(channel => channel.name === "reports") as discord.TextChannel;
             this._kicksAndBansChannel = this._server.channels.find(channel => channel.name === "kicks-and-bans") as discord.TextChannel;
+            this._ticketsToAcceptChannel = this._server.channels.find(channel => channel.name === "tickets-to-accept") as discord.TextChannel;
+            this._ticketsInProgressChannel = this._server.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
+            this._completedTicketsChannel = this._server.channels.find(channel => channel.name === "completed-tickets") as discord.TextChannel;
+
+            this._ticketsToAcceptChannel.send("Test accept channel");
+            this._ticketsInProgressChannel.send("Test progress channel");
+            this._completedTicketsChannel.send("Test completed channel");
 
             // Create new website bot service & startup
             this._websiteBotService = new websiteBotService(this._client, this._config, this._server);

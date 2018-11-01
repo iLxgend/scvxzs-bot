@@ -35,12 +35,12 @@ export class apiBotService {
 
         // On 'TicketCreated' -> fires when ticket is created through API
         connection.on("TicketCreated", async (ticket) => {
-            
+
             // Get all members with happy to help (h2h) role
             let happyToHelpers = this.GetAllWithRole("Happy To Help");
 
             // Loop over all h2h-ers
-            for(let i = 0; i < happyToHelpers.length; i++){
+            for (let i = 0; i < happyToHelpers.length; i++) {
 
                 // Create ticket embed
                 let ticketEmbed = new discord.RichEmbed()
@@ -54,6 +54,27 @@ export class apiBotService {
                 // Send ticket embed to h2h-er
                 happyToHelpers[i].send(ticketEmbed);
             }
+            // Get current guild
+            let guild = this._serverBot.guilds.get(this._config.serverId);
+
+            if (!guild) return ("Server not found");
+
+            //Create embed for helpers to know that the ticket is closed
+            let completedTicketEmbed = new discord.RichEmbed()
+                .setTitle("Ticket: " + ticket.subject + ", has been created")
+                .setColor("#2dff2d")
+                .addField("Their description:", ticket.description)
+                .addField("If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                .setFooter("Thanks for all your help :)");
+
+
+            // Get tickets to accept channel
+            let ticketsToAcceptChannel = guild.channels.find(channel => channel.name === "tickets-to-accept") as discord.TextChannel;
+
+            if (!ticketsToAcceptChannel) return ("Channel not found");
+
+            //Send the embed to the tickets to accept channel
+            ticketsToAcceptChannel.send(completedTicketEmbed)
         });
 
         // On 'TicketReaction' -> fires when ticket reaction has been added to an existing ticket
