@@ -2,8 +2,10 @@ export interface message {
     messageId: string;
     channelId: string;
     guildId: string;
-    timeStamp: Date;
+    timestamp: Date;
     isEmbed: boolean;
+    isDm:boolean;
+    message:string;
 }
 
 export class message implements message {

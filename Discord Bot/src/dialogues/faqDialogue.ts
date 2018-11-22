@@ -6,6 +6,7 @@ import { faqHandler } from "../handlers/faqHandler";
 import * as api from "../api";
 import { faqMessage } from "../models/faq/faqMessage";
 import { apiRequestHandler } from "../handlers/apiRequestHandler";
+import * as msg from "../models/message";
 
 export class faqDialogue {
 
@@ -134,7 +135,7 @@ export class faqDialogue {
                     (guild.channels.find((channel) => channel.name=== "f-a-q") as discord.TextChannel)
                         .send(faqEmbed)
                         .then(newMsg => {
-                            this.setFaqMessageId((newMsg as discord.Message).id, faqData.id);
+                            this.setFaqMessageId((newMsg as discord.Message), faqData.id);
                         });
                 })
                 .catch(err=> {
@@ -145,10 +146,21 @@ export class faqDialogue {
         return data;
     };
 
-    private setFaqMessageId(messageId: string, faqId: number) {
+    private setFaqMessageId(message: discord.Message, faqId: number) {
+        
         let faqMessageObject = new faqMessage();
+
         faqMessageObject.id = faqId;
-        faqMessageObject.messageId = messageId;
+
+        faqMessageObject.message = new msg.message();
+
+        faqMessageObject.message.channelId = message.channel.id;
+        faqMessageObject.message.guildId = message.guild.id;
+        faqMessageObject.message.isEmbed = message.embeds.length > 0;
+        faqMessageObject.message.messageId = message.id;
+        faqMessageObject.message.isDm = message.channel instanceof discord.DMChannel;
+
+        faqMessageObject.message.timestamp = new Date(message.createdTimestamp);
 
         new apiRequestHandler().requestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', this._config)
     }

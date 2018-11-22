@@ -43,7 +43,7 @@ export class dialogueHandler<T> {
                 // later used for removing after reply from user
                 let beforeM;
 
-                // Send before message
+                // Send before discordMessage
                 await channel.send(user + ", " + step.beforeMessage).then(newMsg => {
                     beforeM = newMsg;
                 });
@@ -69,7 +69,7 @@ export class dialogueHandler<T> {
         await this._channel.awaitMessages(filter, { max: 1 })
             .then(async collected => {
 
-                // Get message
+                // Get discordMessage
                 let response = collected.array()[0];
 
                 // Try callback

@@ -5,6 +5,7 @@ import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { email } from '../models/email';
 import * as aspnet from '@aspnet/signalr';
 import { faqMessage } from '../models/faq/faqMessage';
+import { ticket } from '../models/ticket/ticket';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -34,7 +35,7 @@ export class apiBotService {
             .catch(err => console.error(err.toString()));
 
         // On 'TicketCreated' -> fires when ticket is created through API
-        connection.on("TicketCreated", async (ticket) => {
+        connection.on("TicketCreated", async (ticket:ticket) => {
 
             // Get all members with happy to help (h2h) role
             let happyToHelpers = this.GetAllWithRole("Happy To Help");
@@ -45,7 +46,7 @@ export class apiBotService {
                 // Create ticket embed
                 let ticketEmbed = new discord.RichEmbed()
                     .setTitle("Ticket: " + ticket.subject + ", has been created")
-                    //.setDescription(ticket.applicant.username + " is in need of help!")
+                    .setDescription(ticket.applicant.username + " is in need of help!")
                     .setColor('#ffdd05')
                     .addField("Their description:", ticket.description)
                     .addField("Thank you " + happyToHelpers[i].displayName + " for being willing to assist others in our server. If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)

@@ -43,7 +43,7 @@ export default class TicketCommand implements IBotCommand {
         // Array of collected info
         let collectedInfo = new ticketDialogueData();
         
-        // Add message object for later use in apiCall
+        // Add discordMessage object for later use in apiCall
         this.setMessage(message);
         let d = new ticketDialogue();
         // Create category step
@@ -80,7 +80,7 @@ export default class TicketCommand implements IBotCommand {
             .addField("Your Description:", data.description, false)
             .setFooter("Thank you for subitting a ticket " + message.author.username + ". We'll try to get around to it as soon as possible, please be patient.")
 
-            // Delete command message
+            // Delete command discordMessage
             message.delete(0);
 
             // Send ticketEmbed 
@@ -118,10 +118,10 @@ export default class TicketCommand implements IBotCommand {
 
                 console.log(ticket);
 
-                // Get message for getting author info
+                // Get discordMessage for getting author info
                 var message = this.getMessage();
 
-                // Check if message exists
+                // Check if discordMessage exists
                 if (message != null) {
                     
                     // Create new channelHandler

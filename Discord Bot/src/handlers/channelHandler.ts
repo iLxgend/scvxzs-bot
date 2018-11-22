@@ -13,8 +13,8 @@ export class channelhandler {
      * name: createChannelTicketCommand
      * description: Creates a ticket channel based on the ticket command
      * params:
-     * - messageHandler: Function that's fired on each message
-     * - message: Message by creator
+     * - messageHandler: Function that's fired on each discordMessage
+     * - discordMessage: Message by creator
      * - ticketId: Ticket id gotten from POST to API
      */
     public async createChannelTicketCommand(ticketId: number, message: discord.Message) {
@@ -103,7 +103,7 @@ export class channelhandler {
      * description: add permissions for this channel to the h2h-er that used ?acceptTicket {ticketId} 
      * params:
      * - ticketId = ticket id got from api/signalR
-     * - message = h2h-er accept message
+     * - discordMessage = h2h-er accept discordMessage
      */
     public async addPermissionsToChannelTicketCommand(ticketId: number, message: discord.Message, embed: discord.RichEmbed) {
 

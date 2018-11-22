@@ -3,6 +3,7 @@ import * as api from '../api'
 import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { ticketReaction } from '../models/ticket/ticketReaction';
 import { ticketReceive } from '../models/ticket/ticketReceive';
+import * as msg from '../models/message';
 
 export class messageService {
 
@@ -37,7 +38,7 @@ export class messageService {
                     // Check if current user is creator
                     if (message.author.id == creatorId) {
 
-                        // Delete message
+                        // Delete discordMessage
                         message.channel.delete();
 
                         // Close ticket through API
@@ -64,7 +65,7 @@ export class messageService {
                         completedTicketsChannel.send(completedTicketEmbed)
                     }
                     else {
-                        // Delete message if it's not the creator
+                        // Delete discordMessage if it's not the creator
                         message.delete(0);
 
                         // Create embed that tells the creator to close the ticket
@@ -85,7 +86,7 @@ export class messageService {
             // Check if user has permissions
             if (message.member.roles.find((e) => e.name == "Happy To Help" || e.name == "Admin") == null) return;
 
-            // Delete message
+            // Delete discordMessage
             message.channel.delete();
 
             // Close ticket through API
@@ -117,8 +118,17 @@ export class messageService {
         // Fill ticket reaction model
         reaction.ticketId = parseInt(ticketChannelId);
         reaction.fromId = message.author.id;
-        reaction.message = message.content;
-        reaction.messageId = message.id;
+        reaction.username = message.author.username;
+
+        reaction.discordMessage= new msg.message();
+
+        reaction.discordMessage.message = message.content;
+        reaction.discordMessage.messageId = message.id;
+        reaction.discordMessage.timestamp = new Date(message.createdTimestamp);
+        reaction.discordMessage.guildId = message.guild.id;
+        reaction.discordMessage.channelId = message.channel.id;
+        reaction.discordMessage.isEmbed = false;
+        reaction.discordMessage.isDm = false;
 
         // Request API and add our reaction to the database.
         new apiRequestHandler().requestAPI('POST', reaction, 'https://api.dapperdino.co.uk/api/ticket/reaction', this._config);
@@ -134,7 +144,7 @@ export class messageService {
      */
     public updateEmbedToNewChannel(oldChannelId: string, oldMessageId: string, newChannelId: string, message: discord.Message | discord.RichEmbed) {
 
-        //Return new promise, resolves if the new message is sent
+        //Return new promise, resolves if the new discordMessage is sent
         return new Promise<string>(async (resolve, reject) => {
 
             // Get current guild
@@ -160,7 +170,7 @@ export class messageService {
             // Delete old oldMessage
             oldMessage.delete(0);
 
-            // Send new message & resolve with id
+            // Send new discordMessage & resolve with id
             return newChannel
                 .send(message)
                 .then(msg => { return resolve((msg as discord.Message).id) })

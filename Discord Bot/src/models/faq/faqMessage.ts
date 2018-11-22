@@ -1,6 +1,8 @@
+import { message } from "../message";
+
 export interface faqMessage {
     id: number;
-    messageId: string;
+    message: message;
 }
 
 export class faqMessage implements faqMessage {

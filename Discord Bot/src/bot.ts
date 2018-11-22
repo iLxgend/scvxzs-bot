@@ -110,7 +110,7 @@ export class Bot implements IBot {
             this._apiBotService = new apiBotService(this._client, this._config, this._server);
             this._apiBotService.startupService();
 
-            // Create new message service
+            // Create new discordMessage service
             this._messageService = new messageService(this._client, this._config);
 
             // Create new xp handler
@@ -180,7 +180,7 @@ export class Bot implements IBot {
             // Check if welcome channel is found
             if (this._welcomeChannel != null)
 
-                // Send message to welcome channel
+                // Send discordMessage to welcome channel
                 this._welcomeChannel.send(`${member.displayName}, it's a shame you had to leave us. We'll miss you :(`);
             else {
                 // Send missing channel id error for welcome channel
@@ -203,7 +203,7 @@ export class Bot implements IBot {
             // Log to console
             this._logger.debug(`[${message.author.tag}] ${text}`);
 
-            // Check if message is NOT sent in dm
+            // Check if discordMessage is NOT sent in dm
             if (message.channel.type !== "dm") {
 
                 // Add xp
@@ -212,7 +212,7 @@ export class Bot implements IBot {
                 // Get ticket category
                 let ticketCategory = message.guild.channels.find(category => category.name === 'Tickets') as discord.CategoryChannel;
 
-                // Check if message is sent in ticket category
+                // Check if discordMessage is sent in ticket category
                 if ((message.channel as discord.TextChannel).parent == ticketCategory) {
 
                     // Handle messages for tickets
@@ -231,7 +231,7 @@ export class Bot implements IBot {
 
     private async handleCommands(text:string, message:discord.Message) {
 
-        // Check if message is a command
+        // Check if discordMessage is a command
         for (const cmd of this._commands) {
 
             try {
@@ -241,7 +241,7 @@ export class Bot implements IBot {
                     continue;
                 }
 
-                // Create new bot message for our response
+                // Create new bot discordMessage for our response
                 const answer = new BotMessage(message.author);
 
                 // Await processing of cmd

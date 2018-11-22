@@ -5,6 +5,7 @@ import { apiRequestHandler } from '../handlers/apiRequestHandler';
 import { email } from '../models/email';
 import * as aspnet from '@aspnet/signalr';
 import { faqMessage } from '../models/faq/faqMessage';
+import { faqHandler } from '../handlers/faqHandler';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -78,10 +79,10 @@ export class websiteBotService {
                 // Get as text channel
                 let channel = faqChannel as discord.TextChannel;
 
-                // Try to find message with id of updated faq item
+                // Try to find discordMessage with id of updated faq item
                 let message = await channel.fetchMessage(faq.messageId);
 
-                // Try to delete message, then add the updated version
+                // Try to delete discordMessage, then add the updated version
                 message
                     .delete()
                     .then(() => {
@@ -103,9 +104,9 @@ export class websiteBotService {
                         channel
                             .send(faqEmbed)
                             .then((newMsg) => {
-
-                                // Set FAQ message id in db through api when updated
-                                this.SetFaqMessageId((newMsg as discord.Message).id, faq.id, this._config)
+                                let handler = new faqHandler(this._config);
+                                // Set FAQ discordMessage id in db through api when updated
+                                handler.setFaqMessageId((newMsg as discord.Message), faq.id, this._config)
                             });
                     })
                     .catch(console.error);
@@ -113,19 +114,7 @@ export class websiteBotService {
         });
     }
 
-    // Sets faq message in the database through our API
-    private SetFaqMessageId(messageId: string, faqId: number, config: api.IBotConfig) {
 
-        // Create new faqMessage object
-        let faqMessageObject = new faqMessage();
-
-        // Fill with faq & message id
-        faqMessageObject.id = faqId;
-        faqMessageObject.messageId = messageId;
-
-        // Request API
-        new apiRequestHandler().requestAPI("POST", faqMessageObject, 'https://api.dapperdino.co.uk/api/faq/AddMessageId', config)
-    }
 
     public GetAllWithRole(requestedRole: string) {
 
