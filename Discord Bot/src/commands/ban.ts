@@ -7,13 +7,33 @@ export default class BanCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?ban/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?ban', description: 'ADMIN ONLY - (?ban [@user] [reason]) to ban the user from the server with a given reason' }
+        return { caption: '?ban', description: 'ADMIN ONLY - (?ban [@user] [reason]) to ban the user from the server with a given reason', roles: ["admin"] }
+    }
+    
+    public canUseInChannel(channel:discord.TextChannel): boolean {
+        return true;
     }
 
     public init(bot: IBot, dataPath: string): void { }
 
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
+    }
+
+    public canUseCommand(roles: discord.Role[]) {
+        let helpObj: IBotCommandHelp = this.getHelp();
+        let canUseCommand = true;
+
+        if (helpObj.roles != null && helpObj.roles.length > 0) {
+            canUseCommand = false;
+
+            for (var cmdRole in helpObj.roles) {
+                if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
+                    canUseCommand = true;
+            }
+        }
+
+        return canUseCommand;
     }
     
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {

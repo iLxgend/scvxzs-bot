@@ -20,7 +20,8 @@
         "rtfm",
         "serverinfo",
         "suggest",
-        "ticket"
+        "ticket",
+        "ticketInfo"
     ],
     "token": "create bot.prod.json at same folder and put discord token to 'token' property inside",
     "serverId": "create bot.prod.json at same folder and put your server's id inside",

@@ -6,13 +6,33 @@ export default class RTFMCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?rtfm/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?rtfm', description: 'ADMIN ONLY - (?rtfm [@user]) - Give a noob his own discord bot bible' }
+        return { caption: '?rtfm', description: 'ADMIN ONLY - (?rtfm [@user]) - Give a noob his own discord bot bible', roles: ["happy to help", "admin"] }
     }
 
     public init(bot: IBot, dataPath: string): void { }
 
     public isValid(msg: string): boolean {
         return this.CMD_REGEXP.test(msg)
+    }
+
+    public canUseInChannel(channel:discord.TextChannel): boolean {
+        return !channel.name.toLowerCase().startsWith("ticket");
+    }
+
+    public canUseCommand(roles: discord.Role[]) {
+        let helpObj: IBotCommandHelp = this.getHelp();
+        let canUseCommand = true;
+
+        if (helpObj.roles != null && helpObj.roles.length > 0) {
+            canUseCommand = false;
+
+            for (var cmdRole in helpObj.roles) {
+                if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
+                    canUseCommand = true;
+            }
+        }
+
+        return canUseCommand;
     }
 
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {

@@ -26,7 +26,7 @@ export class websiteBotService {
         // Creates connection to our website's SignalR hub
         const connection = new aspnet.HubConnectionBuilder()
             .withUrl('https://dapperdino.co.uk/discordbothub')
-            .configureLogging(aspnet.LogLevel.Debug)
+            .configureLogging(aspnet.LogLevel.Information)
             .build();
 
         // Starts connection

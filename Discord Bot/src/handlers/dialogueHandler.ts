@@ -7,6 +7,7 @@ export class dialogueHandler<T> {
     private _data: T;
     private _currentStep:dialogueStep<T>;
     private _channel?: discord.TextChannel;
+    private _removeMessages: string[];
 
     /**
      *
@@ -16,6 +17,7 @@ export class dialogueHandler<T> {
         this._steps = steps;        
         this._data = data;
         this._currentStep = Array.isArray(steps) ? steps[0] : steps;
+        this._removeMessages = [];
     }
 
     public async getInput(channel: discord.TextChannel, user: discord.GuildMember, config: api.IBotConfig): Promise<T> {
@@ -40,21 +42,22 @@ export class dialogueHandler<T> {
                 // Filter for current user
                 const filter = m => (m.member == user);
 
-                // later used for removing after reply from user
-                let beforeM;
-
                 // Send before discordMessage
-                await channel.send(user + ", " + step.beforeMessage).then(newMsg => {
-                    beforeM = newMsg;
+                await channel.send(user + ", " + step.beforeMessage)
+                .then(newMsg => {
+                    this._removeMessages.push((newMsg as discord.Message).id);
                 });
                 
                 // Handle callback + validation
                 await this.handleCallback(filter);
 
-                // Remove messages
-                beforeM.delete(0);
-
             }
+            
+            this._removeMessages.forEach(id => {
+                let message = channel.messages.get(id);
+
+                if(message) message.delete(0);
+            });
 
             return resolve(this._data);
         });
@@ -72,8 +75,13 @@ export class dialogueHandler<T> {
                 // Get discordMessage
                 let response = collected.array()[0];
 
+                // Add to removal list
+                this._removeMessages.push(response.id);
+
                 // Try callback
-                await this._currentStep.callback(response, this._currentStep.stepData)
+                await this._currentStep
+                    
+                    .callback(response, this._currentStep.stepData)
 
                     // Everything went okay
                     .then(e => {
@@ -91,7 +99,10 @@ export class dialogueHandler<T> {
                             if(this._channel != null)
 
                             // Send validation error
-                            this._channel.send(e.message);
+                            this._channel.send(e.message)
+                            .then(newMsg => {
+                                this._removeMessages.push((newMsg as discord.Message).id);
+                            });;
 
                             // Retry step
                             await this.handleCallback(filter);
@@ -111,8 +122,6 @@ export class dialogueHandler<T> {
             });
 
     }
-
-    private d (){}
 }
 
 export class dialogueStep<E> implements dialogueStep<E> {

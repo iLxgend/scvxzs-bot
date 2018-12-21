@@ -56,6 +56,34 @@ export class Bot implements IBot {
         // Create new instance of discord client
         this._client = new discord.Client()
 
+        let getClient= () =>  {
+            return this._client;
+        }
+
+        let getConfig= () =>  {
+            return this._config;
+        }
+
+        // Automatically reconnect if the bot disconnects due to inactivity
+        this._client.on('disconnect', function(erMsg, code) {
+            console.log('----- Bot disconnected from Discord with code', code, 'for reason:', erMsg, '-----');
+
+            let client = getClient();
+            let config = getConfig();
+
+            client.login(config.token);
+        });
+
+        // Automatically reconnect if the bot errors
+        this._client.on('error', function(error) {
+            console.log(`----- Bot errored ${error} -----`);
+
+            let client = getClient();
+            let config = getConfig();
+            
+            client.login(config.token);
+        });
+
         // On ready event from bot
         this._client.on('ready', () => {
 
@@ -98,9 +126,10 @@ export class Bot implements IBot {
             this._ticketsInProgressChannel = this._server.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
             this._completedTicketsChannel = this._server.channels.find(channel => channel.name === "completed-tickets") as discord.TextChannel;
 
+            /*
             this._ticketsToAcceptChannel.send("Test accept channel");
             this._ticketsInProgressChannel.send("Test progress channel");
-            this._completedTicketsChannel.send("Test completed channel");
+            this._completedTicketsChannel.send("Test completed channel");*/
 
             // Create new website bot service & startup
             this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
@@ -217,7 +246,6 @@ export class Bot implements IBot {
 
                     // Handle messages for tickets
                     this._messageService.handleMessageInTicketCategory(message);
-                    return;
                 }
             }
 
@@ -229,6 +257,8 @@ export class Bot implements IBot {
         this._client.login(this._config.token)
     }
 
+    
+
     private async handleCommands(text:string, message:discord.Message) {
 
         // Check if discordMessage is a command
@@ -238,6 +268,16 @@ export class Bot implements IBot {
 
                 // Validate cmd regex, if not valid, go to the next cmd
                 if (!cmd.isValid(text)) {
+                    continue;
+                }
+                
+                // Validate roles
+                if (!cmd.canUseCommand(message.member.roles.array())) {
+                    continue;
+                }
+
+                // Validate channel
+                if (!cmd.canUseInChannel(message.channel as discord.TextChannel)) {
                     continue;
                 }
 

@@ -2,23 +2,26 @@ import * as discord from 'discord.js';
 import * as api from '../api';
 import { apiRequestHandler } from './apiRequestHandler';
 import { registerModel } from '../models/registerModel';
+import { discordUser } from '../models/discordUser';
 
 export class connectHandler {
 
     // Config used for api
     private _config: api.IBotConfig;
+    private _client: discord.Client;
 
-    constructor(config: api.IBotConfig) {
+    constructor(client: discord.Client, config: api.IBotConfig) {
         
         // Register config
         this._config = config;
+        this._client = client;
     }
 
     
     public async registerDiscord(message: discord.Message) {
 
         // Return new promise
-        return new Promise((resolve,reject)=> {
+        return new Promise(async (resolve,reject)=> {
 
             // Register url
             let registerDiscordUrl = 'https://api.dapperdino.co.uk/api/Account/RegisterDiscord/';
@@ -34,29 +37,21 @@ export class connectHandler {
             model.registrationCode = message.content.replace("?connect ", "");
     
             // Request API
-            return new apiRequestHandler()
-                .requestAPI("POST", model, registerDiscordUrl, this._config)
-
-                // Everything went okay
-                .then((discordAccount) => {
-
-                    // Send okay message
-                    this.sendOkMessage(message, discordAccount)
-
-                    // Resolve
-                    return resolve();
-                })
-                
-                // Whoops, error
-                .catch(reason => {
-
-                    // Log & send reason
-                    console.error(reason);
-                    this.sendRejectMessage(message, reason);
-
-                    // Reject
-                    return reject(reason);
-                });
+            try {
+                const discordAccount = await new apiRequestHandler(this._client, this._config)
+                    .requestAPIWithType<discordUser>("POST", model, registerDiscordUrl, this._config);
+                // Send okay message
+                this.sendOkMessage(message, discordAccount);
+                // Resolve
+                return resolve(true);
+            }
+            catch (reason_1) {
+                // Log & send reason
+                console.error(reason_1);
+                this.sendRejectMessage(message, reason_1);
+                // Reject
+                return reject(reason_1);
+            }
         });
     }
 

@@ -33,6 +33,7 @@ export interface IBotConfig {
 export interface IBotCommandHelp {
     caption: string
     description: string
+    roles?:string[]
 }
 
 export interface IBot {
@@ -45,6 +46,8 @@ export interface IBot {
 
 export interface IBotCommand {
     getHelp(): IBotCommandHelp
+    canUseInChannel(channel:discord.TextChannel): boolean
+    canUseCommand(roles:discord.Role[])
     init(bot: IBot, dataPath: string): void
     isValid(msg: string): boolean
     process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], webBotService:websiteBotService, guild:discord.Guild): Promise<void>

@@ -21,22 +21,22 @@ export class apiBotService {
         this._server = server;
     }
 
-    startupService = () => {
+    startupService = async () => {
 
         // Creates connection to our API's SignalR hub
         const connection = new aspnet.HubConnectionBuilder()
-            .withUrl('https://api.dapperdino.co.uk/discordbothub')
+            .withUrl('https://api.dapperdino.co.uk//discordbothub')
             .configureLogging(aspnet.LogLevel.Debug)
             .build();
 
         // Start connection
-        connection.start()
-            .then(() => console.log("t"))
+        await connection.start()
+            .then(console.log)
             .catch(err => console.error(err.toString()));
 
         // On 'TicketCreated' -> fires when ticket is created through API
         connection.on("TicketCreated", async (ticket:ticket) => {
-
+            console.log('hi')
             // Get all members with happy to help (h2h) role
             let happyToHelpers = this.GetAllWithRole("Happy To Help");
 
@@ -80,7 +80,17 @@ export class apiBotService {
 
         // On 'TicketReaction' -> fires when ticket reaction has been added to an existing ticket
         connection.on("TicketReaction", async (reaction) => {
+            
+        });
 
+        // On 'ReceiveMessage' -> test method
+        connection.on("ReceiveMessage", (user, message) => {
+            let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).discordId);
+            if (testUser) {
+                testUser
+                    .send(message)
+                    .catch(console.error)
+            }
         });
     }
 

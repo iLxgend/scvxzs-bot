@@ -26,6 +26,26 @@ export default class TicketCommand implements IBotCommand {
         return this.CMD_REGEXP.test(msg)
     }
 
+    public canUseInChannel(channel:discord.TextChannel): boolean {
+        return !channel.name.toLowerCase().startsWith("ticket");
+    }
+
+    public canUseCommand(roles: discord.Role[]) {
+        let helpObj: IBotCommandHelp = this.getHelp();
+        let canUseCommand = true;
+
+        if (helpObj.roles != null && helpObj.roles.length > 0) {
+            canUseCommand = false;
+
+            for (var cmdRole in helpObj.roles) {
+                if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
+                    canUseCommand = true;
+            }
+        }
+
+        return canUseCommand;
+    }
+
     private dMessage: discord.Message | null = null;
 
     private setMessage(msg: discord.Message) {

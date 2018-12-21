@@ -8,6 +8,10 @@ export default class BotInfoCommand implements IBotCommand {
     public getHelp(): IBotCommandHelp {
         return { caption: '?botinfo', description: 'Here is some information about me, DapperBot' }
     }
+    
+    public canUseInChannel(channel:discord.TextChannel): boolean {
+        return !channel.name.toLowerCase().startsWith("ticket");
+    }
 
     public init(bot: IBot, dataPath: string): void { }
 

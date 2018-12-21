@@ -1,15 +1,25 @@
 const request = require('request');
 import { IBotConfig } from '../api'
 import * as fs from 'fs'
+import * as discord from 'discord.js';
 import { resolve } from 'dns';
+import { discordUser } from '../models/discordUser';
 
 export class apiRequestHandler {
+    
+    constructor(serverBot?:discord.Client, config?:IBotConfig) {
+        if (serverBot) this._serverBot = serverBot;
+        if (config) this._config = config;
+    }
+    
 
     private _headers = {
         'User-Agent': 'DapperBot/0.0.1',
         'Content-Type': 'application/json',
         'Authorization': ``
     }
+    private _serverBot?: discord.Client;
+    private _config?: IBotConfig;
 
     public async requestAPI(httpType: 'POST' | 'DELETE' | 'PUT' | 'PATCH' | 'GET' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE', data: any, requestUrl: string, config: IBotConfig) {
         return new Promise<apiBody>(async (resolve, reject) => {
@@ -24,20 +34,32 @@ export class apiRequestHandler {
 
             return await request(options, (error: any, response: any, body: any) => {
                 console.log(response.statusCode);
-                if (!error && response.statusCode == 200||response.statusCode == 201) {
+                if (!error && response.statusCode == 200 || response.statusCode == 201) {
                     return resolve(body);
                 }
                 else if (response.statusCode == 401) {
                     console.log(response.statusCode, error)
                     return resolve(this.generateNewToken(options, config));
                 }
-                else if(response.statusCode == 400){
+                else if (response.statusCode == 400) {
                     console.error(response.body)
                     return reject(response.body);
                 }
                 else if (response.statusCode == 403) {
                     console.log("Unauthorized");
                     return reject("403")
+                }
+                else if (response.statusCode == 500 && this._serverBot && this._config) {
+                    let guild = this._serverBot.guilds.get(this._config.serverId);
+
+                    if (!guild) return ("Configured server not found");
+
+                    let channel = guild.channels.find(c => c.name == "web-error-log") as discord.TextChannel;
+                    
+                    if(!channel) return ("web-error-log channel not found") 
+
+                    console.log("test");
+                
                 }
             })
         });
@@ -56,9 +78,9 @@ export class apiRequestHandler {
 
             return await request(options, (error: any, response: any, body: any) => {
                 console.log(response.statusCode);
-                if (!error && response.statusCode == 200||response.statusCode == 201) {
-                    
-                    if(typeof body == "string") {
+                if (!error && response.statusCode == 200 || response.statusCode == 201) {
+
+                    if (typeof body == "string") {
                         return resolve(JSON.parse(body) as T)
                     }
 
@@ -66,10 +88,10 @@ export class apiRequestHandler {
                 }
                 else if (response.statusCode == 401) {
                     console.log(response.statusCode, error)
-                    
+
                     return resolve(this.generateNewTokenWithType<T>(options, config));
                 }
-                else if(response.statusCode == 400){
+                else if (response.statusCode == 400) {
                     console.error(response.body)
                     return reject(response.body);
                 }
@@ -80,7 +102,7 @@ export class apiRequestHandler {
             })
         });
     }
-    
+
     public async generateNewToken(first_options: any, config: IBotConfig) {
         return new Promise<apiBody>(async (resolve, reject) => {
             var options = {
@@ -116,18 +138,17 @@ export class apiRequestHandler {
                     }
                 }).then(async (a) => {
                     return resolve();
-                }).catch(err =>
-                    {
-                        console.error(err);
-                        reject(err);
-                    });
+                }).catch(err => {
+                    console.error(err);
+                    reject(err);
+                });
             } catch (error) {
 
             }
         });
 
     }
-    
+
     public async generateNewTokenWithType<T>(first_options: any, config: IBotConfig) {
         return new Promise<T>(async (resolve, reject) => {
             var options = {
