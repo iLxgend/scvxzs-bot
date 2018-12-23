@@ -3,6 +3,9 @@ import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 
 export default class BotInfoCommand implements IBotCommand {
+    public canUseCommand(roles: discord.Role[]) {
+        return true;
+    }
     private readonly CMD_REGEXP = /^\?botinfo/im
 
     public getHelp(): IBotCommandHelp {

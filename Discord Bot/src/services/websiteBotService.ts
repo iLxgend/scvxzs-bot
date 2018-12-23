@@ -82,35 +82,25 @@ export class websiteBotService {
                 // Try to find discordMessage with id of updated faq item
                 let message = await channel.fetchMessage(faq.messageId);
 
-                // Try to delete discordMessage, then add the updated version
+                // Create faq embed
+                let faqEmbed = new discord.RichEmbed()
+                    .setTitle("-Q: " + faq.question)
+                    .setDescription("-A: " + faq.answer)
+                    .setColor("#2dff2d")
+
+                // Check if resource link is present
+                if (faq.resourceLink != null) {
+
+                    // Add resource link to faq embed
+                    faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
+                }
+
+                // Edit to updated version of embed
                 message
-                    .delete()
-                    .then(() => {
-
-                        // Create faq embed
-                        let faqEmbed = new discord.RichEmbed()
-                            .setTitle("-Q: " + faq.question)
-                            .setDescription("-A: " + faq.answer)
-                            .setColor("#2dff2d")
-
-                        // Check if resource link is present
-                        if (faq.resourceLink != null) {
-
-                            // Add resource link to faq embed
-                            faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
-                        }
-
-                        // Send updated version of embed
-                        channel
-                            .send(faqEmbed)
-                            .then((newMsg) => {
-                                let handler = new faqHandler(this._config);
-                                // Set FAQ discordMessage id in db through api when updated
-                                handler.setFaqMessageId((newMsg as discord.Message), faq.id, this._config)
-                            });
-                    })
+                    .edit(faqEmbed)
                     .catch(console.error);
             }
+
         });
     }
 

@@ -24,7 +24,7 @@ export default class SuggestCommand implements IBotCommand {
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return !channel.name.toLowerCase().startsWith("ticket");
+        return channel.name.toLowerCase() === "create-ticket";
     }
 
     public canUseCommand(roles: discord.Role[]) {

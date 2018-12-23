@@ -10,6 +10,7 @@ import { MissingChannelIdError } from './errors';
 import { messageService } from './services/messageService';
 import { apiBotService } from './services/apiBotService';
 import { channelhandler } from './handlers/channelHandler';
+import { inDialogue } from './models/inDialogue';
 
 export class Bot implements IBot {
     public get commands(): IBotCommand[] { return this._commands }
@@ -47,6 +48,7 @@ export class Bot implements IBot {
         this._kicksAndBansChannel;
         this._faqChannel;
 
+
         // Load all commands
         this.loadCommands(commandsPath, dataPath)
 
@@ -56,16 +58,16 @@ export class Bot implements IBot {
         // Create new instance of discord client
         this._client = new discord.Client()
 
-        let getClient= () =>  {
+        let getClient = () => {
             return this._client;
         }
 
-        let getConfig= () =>  {
+        let getConfig = () => {
             return this._config;
         }
 
         // Automatically reconnect if the bot disconnects due to inactivity
-        this._client.on('disconnect', function(erMsg, code) {
+        this._client.on('disconnect', function (erMsg, code) {
             console.log('----- Bot disconnected from Discord with code', code, 'for reason:', erMsg, '-----');
 
             let client = getClient();
@@ -75,12 +77,12 @@ export class Bot implements IBot {
         });
 
         // Automatically reconnect if the bot errors
-        this._client.on('error', function(error) {
+        this._client.on('error', function (error) {
             console.log(`----- Bot errored ${error} -----`);
 
             let client = getClient();
             let config = getConfig();
-            
+
             client.login(config.token);
         });
 
@@ -225,6 +227,9 @@ export class Bot implements IBot {
             if (message.author.id === this._botId) {
                 return;
             }
+            let a = Bot.isInDialogue(message.channel.id, message.author.id);
+            if (a)
+                return;
 
             // Message as clean text
             const text = message.cleanContent;
@@ -250,16 +255,44 @@ export class Bot implements IBot {
             }
 
             // Handle commands 
-            this.handleCommands(text,message);
+            this.handleCommands(text, message);
 
         })
 
         this._client.login(this._config.token)
     }
 
-    
+    private static dialogueUsers = new Array<inDialogue>();
 
-    private async handleCommands(text:string, message:discord.Message) {
+    public static setIsInDialogue(channelId: string, userId: string, timestamp: Date) {
+        let ind = new inDialogue();
+
+        ind.channelId = channelId;
+        ind.userId = userId;
+        ind.timestamp = timestamp;
+
+        this.dialogueUsers.push(ind)
+    }
+
+    public static isInDialogue(channelId: string, userId: string) {
+
+        let ind = this.dialogueUsers.find(x => x.userId == userId && x.channelId == channelId);
+        return ind != null && new Date().getTime() - ind.timestamp.getTime() < 5 * 60 * 1000;
+    }
+
+    public static removeIsInDialogue(channelId: string, userId: string) {
+        let ind = this.dialogueUsers.find(x => x.userId == userId && x.channelId == channelId);
+
+        if (ind != null) {
+            var index = this.dialogueUsers.indexOf(ind);
+            if (index > -1) {
+                this.dialogueUsers.splice(index, 1);
+            }
+        }
+
+    }
+
+    private async handleCommands(text: string, message: discord.Message) {
 
         // Check if discordMessage is a command
         for (const cmd of this._commands) {
@@ -270,7 +303,7 @@ export class Bot implements IBot {
                 if (!cmd.isValid(text)) {
                     continue;
                 }
-                
+
                 // Validate roles
                 if (!cmd.canUseCommand(message.member.roles.array())) {
                     continue;

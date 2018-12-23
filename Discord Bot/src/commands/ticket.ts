@@ -27,7 +27,7 @@ export default class TicketCommand implements IBotCommand {
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return !channel.name.toLowerCase().startsWith("ticket");
+        return channel.name.toLowerCase() === "create-ticket";
     }
 
     public canUseCommand(roles: discord.Role[]) {
@@ -85,6 +85,9 @@ export default class TicketCommand implements IBotCommand {
         // Create new dialogueHandler with a titleStep and descriptionStep
         let handler = new dialogueHandler([titleStep, descriptionStep], collectedInfo);
 
+        // Add current message for if the user cancels the dialogue
+        handler.addRemoveMessage(message.id);
+
         // Collect info from steps
         await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig)
         .then(data => {
@@ -99,9 +102,6 @@ export default class TicketCommand implements IBotCommand {
             .addField("Your Title:", data.title, false)
             .addField("Your Description:", data.description, false)
             .setFooter("Thank you for subitting a ticket " + message.author.username + ". We'll try to get around to it as soon as possible, please be patient.")
-
-            // Delete command discordMessage
-            message.delete(0);
 
             // Send ticketEmbed 
             message.channel.send(ticketEmbed);

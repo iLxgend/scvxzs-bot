@@ -7,12 +7,12 @@ import { ticketReceive } from '../models/ticket/ticketReceive';
 import { channelhandler } from '../handlers/channelHandler';
 import { websiteBotService } from '../services/websiteBotService';
 
-export default class acceptTicketCommand implements IBotCommand {
+export default class forceCloseTicketCommand implements IBotCommand {
 
-    private readonly CMD_REGEXP = /^\?closeticket/im
+    private readonly CMD_REGEXP = /^\?forceclose/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?closeTicket', description: 'Use this command inside the ticket channel to close your ticket', roles: ["happy to help", "admin"] }
+        return { caption: '?forceClose', description: 'Use this command inside the ticket channel to force close a ticket', roles: ["happy to help", "admin"] }
     }
 
     public init(bot: IBot, dataPath: string): void { }
