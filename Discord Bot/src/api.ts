@@ -46,7 +46,7 @@ export interface IBot {
 
 export interface IBotCommand {
     getHelp(): IBotCommandHelp
-    canUseInChannel(channel:discord.TextChannel): boolean
+    validateChannel(channel:discord.TextChannel): boolean
     canUseCommand(roles:discord.Role[])
     init(bot: IBot, dataPath: string): void
     isValid(msg: string): boolean

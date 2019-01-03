@@ -15,7 +15,7 @@ export default class RTFMCommand implements IBotCommand {
         return this.CMD_REGEXP.test(msg)
     }
 
-    public canUseInChannel(channel:discord.TextChannel): boolean {
+    public validateChannel(channel:discord.TextChannel): boolean {
         return !channel.name.toLowerCase().startsWith("ticket");
     }
 
@@ -26,7 +26,8 @@ export default class RTFMCommand implements IBotCommand {
         if (helpObj.roles != null && helpObj.roles.length > 0) {
             canUseCommand = false;
 
-            for (var cmdRole in helpObj.roles) {
+            for (var i = 0; i < helpObj.roles.length; i++) {
+                var cmdRole = helpObj.roles[i];
                 if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
                     canUseCommand = true;
             }
@@ -45,11 +46,12 @@ export default class RTFMCommand implements IBotCommand {
             msgObj.delete();
             return;
         }
+
         let rtfmEmbed =this.createRtfmEmbed(rtfmUser, msgObj);
 
-            msgObj.channel.send(rtfmEmbed).then(newmsg => {
-                msgObj.delete(0);
-            });
+        msgObj.channel.send(rtfmEmbed).then(newmsg => {
+            msgObj.delete(0);
+        });
     }
 
     private createRtfmEmbed(rtfmUser:discord.GuildMember, message:discord.Message): discord.RichEmbed {
@@ -65,7 +67,7 @@ export default class RTFMCommand implements IBotCommand {
             .setColor("#ff0000")
             .setTitle("The Holy Book of Discord Bots")
             .setURL(url)
-            .addField("There's no need to fear " + rtfmUser.displayName + ".", message.author + " is here to save you. They have bestowed upon you the holy book of Discord Bots. If you read this book each day you will by no doubt develop something great.")
+            .addField("There's no need to fear, " + rtfmUser.displayName + ".", message.author + " is here to save you. They have bestowed upon you the holy book of Discord Bots. If you read this book each day you will by no doubt develop something great.")
             .setFooter("Always refer to this book before becoming an annoyance to the members of the 'Happy To Help' role")
     }
 }
