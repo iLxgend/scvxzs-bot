@@ -9,7 +9,8 @@ import { websiteBotService } from '../services/websiteBotService';
 
 export default class acceptTicketCommand implements IBotCommand {
 
-    private readonly CMD_REGEXP = /^\?closeticket/im
+    private readonly CMD_REGEXP = /^\?close/im
+    private readonly CMD_REGEXP2 = /^\?stop/im
 
     public getHelp(): IBotCommandHelp {
         return { caption: '?closeTicket', description: 'Use this command inside the ticket channel to close your ticket' }
@@ -18,7 +19,12 @@ export default class acceptTicketCommand implements IBotCommand {
     public init(bot: IBot, dataPath: string): void { }
 
     public isValid(msg: string): boolean {
-        return this.CMD_REGEXP.test(msg.toLowerCase())
+        let b = this.CMD_REGEXP.test(msg.toLowerCase());
+
+        if (!b)
+            b = this.CMD_REGEXP2.test(msg.toLowerCase())
+
+        return b;
     }
     
     public canUseInChannel(channel:discord.TextChannel): boolean {

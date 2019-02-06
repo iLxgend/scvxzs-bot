@@ -8,7 +8,7 @@ export class dialogueHandler<T> {
     private _data: T;
     private _currentStep: dialogueStep<T>;
     private _channel?: discord.TextChannel;
-    private _removeMessages: string[];
+    private _removeMessages: discord.Message[];
     private _cancelDialogue: boolean;
 
     /**
@@ -16,15 +16,35 @@ export class dialogueHandler<T> {
      */
     constructor(steps: dialogueStep<T>[] | dialogueStep<T>, data: T) {
 
+        // Set private steps to the inputted steps 
         this._steps = steps;
+
+        // Set private data to inputted data
         this._data = data;
-        this._currentStep = Array.isArray(steps) ? steps[0] : steps;
+
+        // Create array for single dialogueStep to prevent extra checks + coding
+        if (!Array.isArray(this._steps)) {
+
+            // Transform to array
+            this._steps = [this._steps];
+        }
+
+        // Set current step to the first step
+        this._currentStep = steps[0];
+
+        // Create empty array
         this._removeMessages = [];
+
+        // Initial state of cancelling the dialogue is false
         this._cancelDialogue = false;
     }
 
-    public addRemoveMessage(id: string) {
-        this._removeMessages.push(id);
+
+    // Used for adding 
+    public addRemoveMessage(message: discord.Message) {
+
+        // Add message to the removeMessages list
+        this._removeMessages.push(message);
     }
 
     public async getInput(channel: discord.TextChannel, user: discord.GuildMember, config: api.IBotConfig): Promise<T> {
@@ -32,19 +52,15 @@ export class dialogueHandler<T> {
         return new Promise<T>(async (resolve, reject) => {
 
             this._channel = channel;
-
-            // Create array for single dialogueStep to prevent extra checks + coding
-            if (!Array.isArray(this._steps)) {
-
-                // Transform to array
-                this._steps = [this._steps];
-            }
-
+            
             // Set in dialogue
             Bot.setIsInDialogue(this._channel.id, user.user.id, new Date())
 
             // Loop over each step
-            for (const step of this._steps) {
+            for (const step of this._steps as dialogueStep<T>[]) {
+
+                // Check if user has cancelled dialogue, then stop the loop
+                if (this._cancelDialogue) break;
 
                 // Set current step
                 this._currentStep = step;
@@ -52,61 +68,72 @@ export class dialogueHandler<T> {
                 // Filter for current user
                 const filter = m => (m.member == user);
 
+                let message = new discord.RichEmbed()
+                    .setTitle("Hi " + user.user.username)
+                    .setDescription(step.beforeMessage)
+                    .addField("Notification for", user)
+                    .setFooter("You can cancel the process by responding with ?cancel");
+
                 // Send before discordMessage
-                await channel.send(user + ", " + step.beforeMessage)
+                await channel.send(message)
                     .then(newMsg => {
-                        this._removeMessages.push((newMsg as discord.Message).id);
+                        this._removeMessages.push(newMsg as discord.Message);
                     });
 
                 // Handle callback + validation
                 await this.handleCallback(filter, user.id);
-
-                // Check if user has cancelled dialogue
-                if (this._cancelDialogue) {
-                    Bot.removeIsInDialogue(channel.id, user.user.id);
-                    this._removeMessages.forEach(id => {
-                        let message = channel.messages.get(id);
-
-                        if (message) message.delete(0);
-                    });
-                    return reject("User cancelled dialogue")
-                }
-
             }
 
-            Bot.removeIsInDialogue(channel.id, user.user.id);
+            // Set in dialogue state to false
+            Bot.removeIsInDialogue(channel.id, user.user.id)
+            .catch(e => { console.error("--- dialogueHandler error (can't remove from isInDialogue)");console.error(e) });
 
-            this._removeMessages.forEach(id => {
-                let message = channel.messages.get(id);
+            // Remove all messages that have been sent by looping over them (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach)
+            this._removeMessages.forEach(message => {
 
-                if (message) message.delete(0);
+                // Delete message
+                message.delete(0);
             });
-            return resolve(this._data);
+            
+            // If the user cancelled, reject else resolve with the data that has been modified throughout the steps
+            return this._cancelDialogue ? reject("User cancelled dialogue") : resolve(this._data);
         });
     }
 
     public async handleCallback(filter, authorId) {
+
+        // Check if channel is null
         if (this._channel == null) {
+
+            // Stop callback
             return;
         }
 
         await this._channel.awaitMessages(filter, { max: 1 })
+
+            // If we get a response
             .then(async collected => {
 
-                // Get discordMessage
-                let response = collected.array()[0];
+                // Get first and only discordMessage
+                let response = collected.first();
 
                 // Add to removal list
-                this._removeMessages.push(response.id);
+                this._removeMessages.push(response);
 
+                // Cancel the dialogue
                 if (response.content === "?cancel") {
+
+                    // Set variable _cancelDialogue to true so we can break out of the step loop
                     this._cancelDialogue = true;
+
+                    // Stop callback
                     return;
                 }
 
                 // Try callback
                 await this._currentStep
 
+                    // Set parameters to the message response object and the modified stepdata
                     .callback(response, this._currentStep.stepData)
 
                     // Everything went okay
@@ -122,19 +149,24 @@ export class dialogueHandler<T> {
                         // Check for validation errors
                         if (e instanceof validationError) {
 
+                            // Check if channel isn't null
                             if (this._channel != null)
 
                                 // Send validation error
                                 this._channel.send(e.message)
+
+                                    // If the message is sent
                                     .then(newMsg => {
-                                        this._removeMessages.push((newMsg as discord.Message).id);
-                                    });;
+
+                                        // Add new message to remove list
+                                        this._removeMessages.push((newMsg as discord.Message));
+                                    });
 
                             // Retry step
                             await this.handleCallback(filter, authorId);
                         }
 
-                        console.error(e)
+                        console.error(e);
                     });
 
                 //response.delete(0);
@@ -142,7 +174,7 @@ export class dialogueHandler<T> {
             .catch(collected => {
 
                 // ERROR
-                console.log(console.error(collected))
+                console.error("--- dialogueHandler error --- \n" + collected);
                 if (this._channel != null)
                     this._channel.send(this._currentStep.errorMessage);
             });

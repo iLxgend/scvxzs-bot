@@ -49,6 +49,10 @@ export default class RollCommand implements IBotCommand {
         {
             answer.setTitle("Really... A zero sided die? Really???");
         }
+        else if(faces < 0 || faces == Infinity )
+        {
+            answer.setTitle("You broke the die.");
+        }
         else
         {
             result = Math.floor(Math.random() * faces) + 1;

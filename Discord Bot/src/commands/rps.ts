@@ -19,7 +19,7 @@ export default class RPSCommand implements IBotCommand {
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return !channel.name.toLowerCase().startsWith("ticket");
+        return true;
     }
 
     public canUseCommand(roles: discord.Role[]) {

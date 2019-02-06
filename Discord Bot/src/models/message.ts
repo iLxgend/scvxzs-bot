@@ -6,6 +6,7 @@ export interface message {
     isEmbed: boolean;
     isDm:boolean;
     message:string;
+    imageLink:string;
 }
 
 export class message implements message {

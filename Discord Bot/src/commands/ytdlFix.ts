@@ -3,10 +3,10 @@ import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 
 export default class RTFMCommand implements IBotCommand {
-    private readonly CMD_REGEXP = /^\?rtfm/im
+    private readonly CMD_REGEXP = /^\?ytdlfix/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?rtfm', description: 'ADMIN ONLY - (?rtfm [@user]) - Give a noob his own discord bot bible', roles: ["happy to help", "admin"] }
+        return { caption: '?ytdlfix', description: 'Send the automated ytdl-fix message', roles: ["happy to help", "admin"] }
     }
 
     public init(bot: IBot, dataPath: string): void { }
@@ -26,8 +26,8 @@ export default class RTFMCommand implements IBotCommand {
         if (helpObj.roles != null && helpObj.roles.length > 0) {
             canUseCommand = false;
 
-            for (let i = 0; i < helpObj.roles.length; i++) {
-                let cmdRole = helpObj.roles[i];
+            for (var i = 0;i < helpObj.roles.length; i++) {
+                var cmdRole = helpObj.roles[i];
                 if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
                     canUseCommand = true;
             }
@@ -46,17 +46,17 @@ export default class RTFMCommand implements IBotCommand {
             msgObj.delete();
             return;
         }
-        let rtfmEmbed =this.createRtfmEmbed(rtfmUser, msgObj);
+        let rtfmEmbed =this.createYtdlEmbed(rtfmUser, msgObj);
 
             msgObj.channel.send(rtfmEmbed).then(newmsg => {
                 msgObj.delete(0);
             });
     }
 
-    private createRtfmEmbed(rtfmUser:discord.GuildMember, message:discord.Message): discord.RichEmbed {
+    private createYtdlEmbed(ytdlUser:discord.GuildMember, message:discord.Message): discord.RichEmbed {
         
         let matches = message.content.match(/\bhttps?:\/\/\S+/gi);
-        let url = 'https://discord.js.org/#/docs/main/stable/general/welcome/';
+        let url = 'https://dapperdino.co.uk/ytdl-fix.zip';
         
         if (matches != null) {
             url = matches[0];
@@ -64,9 +64,10 @@ export default class RTFMCommand implements IBotCommand {
 
         return new discord.RichEmbed()
             .setColor("#ff0000")
-            .setTitle("The Holy Book of Discord Bots")
+            .setTitle("The YTDL Fix")
             .setURL(url)
-            .addField("There's no need to fear, " + rtfmUser.displayName + ".", message.author + " is here to save you. They have bestowed upon you the holy book of Discord Bots. If you read this book each day you will by no doubt develop something great.")
-            .setFooter("Always refer to this book before becoming an annoyance to the members of the 'Happy To Help' role")
+            .addField("Please download the zip file " + ytdlUser.displayName + ".", message.author + " asks you to download the zip file and extract the files to your node_modules folder (overwrite files).")
+            .addField("Video explanation:", "https://www.youtube.com/watch?v=MsMYrxyYNZc")
+            .setFooter("If you keep experiencing errors, feel free to ask your question in a ticket.")
     }
 }

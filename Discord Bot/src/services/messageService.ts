@@ -16,6 +16,11 @@ export class messageService {
     }
 
     public handleMessageInTicketCategory(message: discord.Message) {
+        
+        if (message.content.indexOf("TypeError [ERR_INVALID_ARG_TYPE]: The \"file\" argument must be of type string.") >= 0) {
+            let embed = this.createYtdlEmbed(message.member, message);
+            message.channel.send(embed);
+        }
 
         // Get ticket channel id from channel name
         let ticketChannelId = ((message.channel as discord.TextChannel).name.toString().replace("ticket", "")).toString();
@@ -83,5 +88,23 @@ export class messageService {
                 .then(msg => { return resolve((msg as discord.Message).id) })
                 .catch(reject);
         });
+    }
+
+
+    private createYtdlEmbed(ytdlUser:discord.GuildMember, message:discord.Message): discord.RichEmbed {
+        
+        let matches = message.content.match(/\bhttps?:\/\/\S+/gi);
+        let url = 'https://dapperdino.co.uk/ytdl-fix.zip';
+        
+        if (matches != null) {
+            url = matches[0];
+        }
+
+        return new discord.RichEmbed()
+            .setColor("#ff0000")
+            .setTitle("The YTDL Fix")
+            .setURL(url)
+            .addField("Please download the zip file " + ytdlUser.displayName + ".", message.author + " asks you to download the zip file and extract the files to your node_modules folder (overwrite files).")
+            .setFooter("If you keep experiencing errors, feel free to ask your question in a ticket.")
     }
 }

@@ -46,8 +46,8 @@ export interface IBot {
 
 export interface IBotCommand {
     getHelp(): IBotCommandHelp
-    validateChannel(channel:discord.TextChannel): boolean
-    canUseCommand(roles:discord.Role[])
+    canUseInChannel(channel:discord.TextChannel): boolean
+    canUseCommand(roles:discord.Role[],message?: discord.Message)
     init(bot: IBot, dataPath: string): void
     isValid(msg: string): boolean
     process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[], webBotService:websiteBotService, guild:discord.Guild): Promise<void>

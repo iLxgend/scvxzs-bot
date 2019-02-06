@@ -1,12 +1,12 @@
 import { IBot, IBotCommand, IBotCommandHelp, IBotMessage, IBotConfig } from '../api'
 import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
+import BaseCommand from '../baseCommand';
 
-export default class BotInfoCommand implements IBotCommand {
-    public canUseCommand(roles: discord.Role[]) {
-        return true;
+export default class BotInfoCommand extends BaseCommand {
+    constructor(){
+        super(/^\?botinfo/im);
     }
-    private readonly CMD_REGEXP = /^\?botinfo/im
 
     public getHelp(): IBotCommandHelp {
         return { caption: '?botinfo', description: 'Here is some information about me, DapperBot' }
@@ -17,10 +17,6 @@ export default class BotInfoCommand implements IBotCommand {
     }
 
     public init(bot: IBot, dataPath: string): void { }
-
-    public isValid(msg: string): boolean {
-        return this.CMD_REGEXP.test(msg)
-    }
     
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
         answer.setDescription("Bot Information");

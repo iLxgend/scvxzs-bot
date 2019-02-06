@@ -7,24 +7,23 @@ import { connectDialogue } from '../dialogues/connectDialogue';
 import { dialogueStep, dialogueHandler } from '../handlers/dialogueHandler';
 import BaseCommand from '../baseCommand';
 
-export default class RegisterCommand extends BaseCommand {
-    
+export default class DescriptionCommand extends BaseCommand {
     constructor(){
-        super(/^\?connect/im);
+        super(/^\?description/im);
     }
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?connect codehere', description: 'Connect your discord to your website account. You can find your code on your profile page.' }
+        return { caption: '?description', description: 'Connect your discord to your website account. You can find your code on your profile page.' }
     }
 
     public init(bot: IBot, dataPath: string): void { }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return !channel.name.toLowerCase().startsWith("ticket");
+        return channel.name.toLowerCase().startsWith("ticket");
     }
 
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        
+        /*
         if (msg.toLowerCase().trim() !== "?connect") {
             let model = false;
             let dialogue = new connectDialogue(config, msgObj.channel as discord.TextChannel, msgObj.member, client);
@@ -47,6 +46,7 @@ export default class RegisterCommand extends BaseCommand {
             new connectHandler(client, config)
             .registerDiscord(msgObj)
             .then()
-        }
+        }*/
+        
     }
 }

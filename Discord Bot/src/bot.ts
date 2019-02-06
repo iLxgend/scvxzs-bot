@@ -38,6 +38,7 @@ export class Bot implements IBot {
     private _apiBotService!: apiBotService;
     private _messageService!: messageService;
     private _xpHandler!: xpHandler;
+    private _hasApiConnection: boolean = false;
 
     public start(logger: ILogger, config: IBotConfig, commandsPath: string, dataPath: string) {
         this._logger = logger
@@ -133,13 +134,17 @@ export class Bot implements IBot {
             this._ticketsInProgressChannel.send("Test progress channel");
             this._completedTicketsChannel.send("Test completed channel");*/
 
-            // Create new website bot service & startup
-            this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
-            this._websiteBotService.startupService();
+            if (!this._hasApiConnection) {
+                // Create new website bot service & startup
+                this._websiteBotService = new websiteBotService(this._client, this._config, this._server);
+                this._websiteBotService.startupService();
 
-            // Create new api bot service & startup
-            this._apiBotService = new apiBotService(this._client, this._config, this._server);
-            this._apiBotService.startupService();
+                // Create new api bot service & startup
+                this._apiBotService = new apiBotService(this._client, this._config, this._server);
+                this._apiBotService.startupService();
+
+                this._hasApiConnection = true;
+            }
 
             // Create new discordMessage service
             this._messageService = new messageService(this._client, this._config);
@@ -280,16 +285,28 @@ export class Bot implements IBot {
         return ind != null && new Date().getTime() - ind.timestamp.getTime() < 5 * 60 * 1000;
     }
 
-    public static removeIsInDialogue(channelId: string, userId: string) {
-        let ind = this.dialogueUsers.find(x => x.userId == userId && x.channelId == channelId);
+    public static async removeIsInDialogue(channelId: string, userId: string) {
 
-        if (ind != null) {
-            var index = this.dialogueUsers.indexOf(ind);
-            if (index > -1) {
-                this.dialogueUsers.splice(index, 1);
-            }
-        }
+        return new Promise((resolve, reject) => {
+            // Try to find in dialogue user
+            let inDialogueUser = this.dialogueUsers.find(x => x.userId == userId && x.channelId == channelId);
 
+            // Check if user is found
+            if (inDialogueUser != null) {
+
+                // Get index of user
+                var index = this.dialogueUsers.indexOf(inDialogueUser);
+
+                // Check if user is found
+                if (index > -1) {
+
+                    // Remove user from list 
+                    this.dialogueUsers.splice(index, 1);
+                }
+
+                // Reject the promise because we can't find the user
+            } else return reject("");
+        })
     }
 
     private async handleCommands(text: string, message: discord.Message) {

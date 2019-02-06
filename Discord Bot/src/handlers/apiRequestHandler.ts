@@ -99,6 +99,9 @@ export class apiRequestHandler {
                     console.log("Unauthorized");
                     return reject("403")
                 }
+                else if (response.statusCode == 500) {
+                    return reject("500");
+                }
             })
         });
     }

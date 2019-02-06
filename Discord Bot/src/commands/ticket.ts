@@ -12,7 +12,7 @@ import { websiteBotService } from '../services/websiteBotService';
 import { ticketDialogueData, ticketDialogue } from '../dialogues/ticketDialogue';
 
 export default class TicketCommand implements IBotCommand {
-    private readonly CMD_REGEXP = /^\?ticket/im
+    private readonly CMD_REGEXP = /^\?(help?|ticket?|createticket)/im
 
     private _guild;
 
@@ -23,11 +23,14 @@ export default class TicketCommand implements IBotCommand {
     public init(bot: IBot, dataPath: string): void { }
 
     public isValid(msg: string): boolean {
-        return this.CMD_REGEXP.test(msg)
+        let b = this.CMD_REGEXP.test(msg.toLowerCase())
+
+        return b; 
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return channel.name.toLowerCase() === "create-ticket";
+        if (channel.parent.name.toLowerCase() !== "bot commands") return false
+        return channel.name.toLowerCase() === "create-ticket" || channel.name.toLocaleLowerCase() === "help";
     }
 
     public canUseCommand(roles: discord.Role[]) {
@@ -86,7 +89,7 @@ export default class TicketCommand implements IBotCommand {
         let handler = new dialogueHandler([titleStep, descriptionStep], collectedInfo);
 
         // Add current message for if the user cancels the dialogue
-        handler.addRemoveMessage(message.id);
+        handler.addRemoveMessage(message);
 
         // Collect info from steps
         await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig)
@@ -101,7 +104,7 @@ export default class TicketCommand implements IBotCommand {
             .setColor('#ffdd05')
             .addField("Your Title:", data.title, false)
             .addField("Your Description:", data.description, false)
-            .setFooter("Thank you for subitting a ticket " + message.author.username + ". We'll try to get around to it as soon as possible, please be patient.")
+            .setFooter("Happy new year everyone! Please expect some delay in ticket handling this holiday season.")
 
             // Send ticketEmbed 
             message.channel.send(ticketEmbed);

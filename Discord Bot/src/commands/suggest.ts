@@ -24,7 +24,7 @@ export default class SuggestCommand implements IBotCommand {
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return channel.name.toLowerCase() === "create-ticket";
+        return channel.name.toLowerCase() === "create-suggestion";
     }
 
     public canUseCommand(roles: discord.Role[]) {
@@ -65,6 +65,8 @@ export default class SuggestCommand implements IBotCommand {
         
         let handler = new dialogueHandler([suggestionCategoryStep, suggestionStep], collectedInfo);
 
+        handler.addRemoveMessage(message);
+
         await handler.getInput(message.channel as discord.TextChannel, message.member, config as IBotConfig).then(data => {
             if(data != null){
                 fs.appendFile('../suggestions.txt', "ID: " + message.author + ", Username: " + message.author.username + ", Suggestion: " + data.description + "\n", function(err){
@@ -74,16 +76,22 @@ export default class SuggestCommand implements IBotCommand {
                     }
                     console.log('Updated!');
                 })
-                message.delete(0);
-                dialogue.handleAPI(data);
-                let suggestionEmbed = new discord.RichEmbed()
-                    .setTitle("Thank You For Leaving A Suggestion")
-                    .setColor("#ff0000")
-                    .addField(message.author.username, "Suggested Dapper Dino to: " + data.description, false)
-                    .addField("Your request has been added to Dapper's suggestions list", "Thanks for your contribution", false)
-                    .setFooter("Sit tight and I might get around to your idea... eventually :D")
+                dialogue.handleAPI(data)
+                .then(newData => {
+                    let suggestionEmbed = new discord.RichEmbed()
+                        .setTitle("Thank You For Leaving A Suggestion")
+                        .setColor("#ff0000")
+                        .addField(message.author.username, "Suggested Dapper Dino to: " + newData.description, false)
+                        .addField("Your request has been added to Dapper's suggestions list", "Thanks for your contribution", false)
+                        .setFooter("Sit tight and I might get around to your idea... eventually :D")
                     
-                message.channel.send(suggestionEmbed);
+                    message.channel.send(suggestionEmbed);
+                })
+                .catch(err => {
+                    console.error(err);
+                    message.reply("Something went wrong leaving your suggestion, please contact an admin");
+                });
+                
             }
         });
     }

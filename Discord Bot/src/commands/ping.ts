@@ -16,7 +16,7 @@ export default class PingCommand implements IBotCommand {
     }
 
     public canUseInChannel(channel:discord.TextChannel): boolean {
-        return !channel.name.toLowerCase().startsWith("ticket");
+        return channel.name.toLowerCase().startsWith("other");
     }
 
     public canUseCommand(roles: discord.Role[]) {

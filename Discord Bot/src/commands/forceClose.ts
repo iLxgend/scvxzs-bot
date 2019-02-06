@@ -32,7 +32,8 @@ export default class forceCloseTicketCommand implements IBotCommand {
         if (helpObj.roles != null && helpObj.roles.length > 0) {
             canUseCommand = false;
 
-            for (var cmdRole in helpObj.roles) {
+            for (var i = 0;i < helpObj.roles.length; i++) {
+                var cmdRole = helpObj.roles[i];
                 if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
                     canUseCommand = true;
             }

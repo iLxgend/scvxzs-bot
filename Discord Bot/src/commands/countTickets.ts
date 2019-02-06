@@ -3,7 +3,7 @@ import { getRandomInt } from '../utils'
 import * as discord from 'discord.js'
 import { apiRequestHandler } from '../handlers/apiRequestHandler';
 
-export default class BotInfoCommand implements IBotCommand {
+export default class CountTicketsCommand implements IBotCommand {
     public canUseCommand(roles: discord.Role[]) {
         let helpObj: IBotCommandHelp = this.getHelp();
         let canUseCommand = true;
@@ -11,7 +11,7 @@ export default class BotInfoCommand implements IBotCommand {
         if (helpObj.roles != null && helpObj.roles.length > 0) {
             canUseCommand = false;
 
-            for (var i = 0;i < helpObj.roles.length; i++) {
+            for (var i = 0; i < helpObj.roles.length; i++) {
                 var cmdRole = helpObj.roles[i];
                 if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
                     canUseCommand = true;
@@ -20,10 +20,10 @@ export default class BotInfoCommand implements IBotCommand {
 
         return canUseCommand;
     }
-    private readonly CMD_REGEXP = /^\?opentickets/im
+    private readonly CMD_REGEXP = /^\?counttickets/im
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?opentickets', description: 'Sends a list of all joinable tickets to your dms', roles: ["admin", "happy to help"] }
+        return { caption: '?countTickets', description: 'Sends an embed in the current channel with the open ticket count', roles: ["admin", "happy to help"] }
     }
 
     public canUseInChannel(channel: discord.TextChannel): boolean {
@@ -33,13 +33,11 @@ export default class BotInfoCommand implements IBotCommand {
     public init(bot: IBot, dataPath: string): void { }
 
     public isValid(msg: string): boolean {
-        return this.CMD_REGEXP.test(msg)
+        return this.CMD_REGEXP.test(msg.toLowerCase())
     }
 
     public async process(msg: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        let embed = new discord.RichEmbed()
-            .setColor("#ff0000")
-            .setTitle("All open tickets");
+
 
         new apiRequestHandler(client, config)
 
@@ -50,24 +48,11 @@ export default class BotInfoCommand implements IBotCommand {
             // When everything went right, we receive a ticket back, so we add the h2h-er to the ticket channel
             .then(tickets => {
 
-                for (let i = 0; i < tickets.length; i++) {
-                    let ticket = tickets[i];
+                let embed = new discord.RichEmbed()
+                    .setColor("#ff0000")
+                    .setTitle(`There's currently ${tickets.length} open tickets`);
 
-                    let channel = message.guild.channels.find(x => x.name.toLowerCase() === `ticket${ticket.id}`);
-
-                    // TODO: ticket might be closed
-                    if (channel == null) continue;
-
-                    embed.addField(`Ticket${ticket.id} (${ticket.count} team member(s) helping)`, ticket.subject);
-                    if (i == 25) {
-                        message.author.send(embed);
-                        embed = new discord.RichEmbed()
-                            .setColor("#ff0000")
-                            .setTitle("All open tickets");
-                    }
-                }
-
-                message.author.send(embed);
+                message.channel.send(embed);
             });
     }
 }

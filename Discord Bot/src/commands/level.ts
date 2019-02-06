@@ -53,8 +53,9 @@ export default class LevelCommand implements IBotCommand {
     }
 
     private createLevelEmbed(msgObj, config) {
-        return new Promise<discord.RichEmbed>(async (resolve, reject) => {
 
+        return new Promise<discord.RichEmbed>(async (resolve, reject) => {
+            
             new xpHandler(config)
             .getLevelDataById(msgObj.author.id)
             .then(levelData => {

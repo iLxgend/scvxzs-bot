@@ -6,6 +6,7 @@ import { email } from '../models/email';
 import * as aspnet from '@aspnet/signalr';
 import { faqMessage } from '../models/faq/faqMessage';
 import { faqHandler } from '../handlers/faqHandler';
+import { suggest } from '../models/suggest';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -19,6 +20,7 @@ export class websiteBotService {
         this._serverBot = serverBot;
         this._config = config;
         this._server = server;
+        
     }
 
     startupService = () => {
@@ -45,7 +47,7 @@ export class websiteBotService {
         });
 
         // On 'SuggestionUpdate' -> fires when suggestion is updated on the website
-        connection.on("SuggestionUpdate", (suggestion) => {
+        connection.on("SuggestionUpdate", (suggestion:suggest) => {
 
             // Get user that suggested this suggestion
             let suggestor = this._serverBot.users.get(suggestion.discordUser.discordId);
@@ -53,12 +55,37 @@ export class websiteBotService {
             // Check if found
             if (suggestor) {
 
+                let suggestionTypeText = (type:number) => {
+                    switch(type) {
+                        case 0: return "Bot";
+                        case 1: return "Website";
+                        case 2: return "General";
+                        case 3: return "YouTube";
+                        case 4: return "Undecided";
+                        default:return "Undecided";
+                    }
+                }
+
+                let suggestionStatusText = (type:number) => {
+                    switch(type) {
+                        case 0: return "Abandoned";
+                        case 1: return "WorkInProgress";
+                        case 2: return "InConsideration";
+                        case 3: return "Completed";
+                        case 4: return "Future";
+                        default:return "NotLookedAt";
+                    }
+                }
+
                 // Create suggestion embed
-                let suggestionUpdateEmbed = new discord.RichEmbed()
+                let suggestionUpdateEmbed = new discord.RichEmbed({})
                     .setTitle("Your suggestion has been updated!")
                     .setColor("0xff0000")
                     .addField("Here you will find the information about your updated suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
-                    .addField("Thanks as always for being a part of the community, it means a lot", "")
+                    .addField("Suggestion description:", suggestion.description)
+                    .addField("Suggestion Type:", suggestionTypeText(suggestion.type))
+                    .addField("Suggestion Status:", suggestionStatusText(suggestion.status))
+                    .addField("Thanks as always for being a part of the community.", "It means a lot!")
                     .setFooter("With ❤ By the DapperCoding team");
 
                 // Send embed to suggestor
@@ -80,28 +107,59 @@ export class websiteBotService {
                 let channel = faqChannel as discord.TextChannel;
 
                 // Try to find discordMessage with id of updated faq item
-                let message = await channel.fetchMessage(faq.messageId);
+                let message = await channel.fetchMessage(faq.discordMessage.messageId);
 
-                // Create faq embed
-                let faqEmbed = new discord.RichEmbed()
-                    .setTitle("-Q: " + faq.question)
-                    .setDescription("-A: " + faq.answer)
-                    .setColor("#2dff2d")
-
-                // Check if resource link is present
-                if (faq.resourceLink != null) {
-
-                    // Add resource link to faq embed
-                    faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
-                }
-
-                // Edit to updated version of embed
+                // Try to delete discordMessage, then add the updated version
                 message
-                    .edit(faqEmbed)
+                    .delete()
+                    .then(() => {
+
+                        // Create faq embed
+                        let faqEmbed = new discord.RichEmbed()
+                            .setTitle("-Q: " + faq.question)
+                            .setDescription("-A: " + faq.answer)
+                            .setColor("#2dff2d")
+
+                        // Check if resource link is present
+                        if (faq.resourceLink != null) {
+
+                            // Add resource link to faq embed
+                            faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
+                        }
+
+                        // Send updated version of embed
+                        channel
+                            .send(faqEmbed)
+                            .then((newMsg) => {
+                                let handler = new faqHandler(this._config);
+                                // Set FAQ discordMessage id in db through api when updated
+                                handler.setFaqMessageId((newMsg as discord.Message), faq.id, this._config)
+                            });
+                    })
                     .catch(console.error);
             }
-
         });
+
+
+
+         // On 'AcceptedApplicant' -> when admin accepts a h2h member through the admin panel
+         connection.on("AcceptedApplicant", async (accepted) => {
+            let member = this._server.members.find(member => member.user.id == accepted.discordId);
+            if (member == null) return true;
+
+            let role = this._server.roles.find(role => role.name.toLowerCase() == "happy to help");
+            if (role == null) return true;
+
+            member.addRole(role).catch(console.error);
+            member.send("Please use the `?commands` command in the #h2h-admin-commands");
+
+            let channel = this._server.channels.find(channel => channel.name.toLowerCase() == "dapper-team") as discord.TextChannel;
+            if (channel == null) return false;
+            
+            channel.send(`Please welcome ${member.user.username} to the team!`).catch(console.error);
+
+            
+         });
     }
 
 

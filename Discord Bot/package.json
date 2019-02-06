@@ -29,10 +29,12 @@
         "discord.js": "^11.4.2",
         "gulp": "^3.9.1",
         "gulp-ts": "^0.3.0",
+        "moment": "^2.23.0",
         "node": "^10.8.0",
         "node-fetch": "^1.7.3",
         "request": "^2.88.0",
         "superagent": "^3.8.3",
+        "uuid": "^3.3.2",
         "websocket": "^1.0.26",
         "xmlhttprequest": "^1.8.0"
     }

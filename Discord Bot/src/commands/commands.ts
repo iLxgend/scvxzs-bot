@@ -39,12 +39,22 @@ export default class CommandsCommand implements IBotCommand {
         let helpEmbed = new discord.RichEmbed()
             .setTitle("Here is a list of all our commands")
             .setColor("#ff0000");
-
+        let index = 0;
         for (const cmd of commands) {
             let helpObj = cmd.getHelp();
 
-            if (cmd.canUseCommand(msgObj.member.roles.array()))
+            if (cmd.canUseCommand(msgObj.member.roles.array())) {
                 helpEmbed.addField(helpObj.caption, helpObj.description, false);
+                if (index % 20 == 0) {
+                    msgObj.author.send(helpEmbed);
+                    helpEmbed = new discord.RichEmbed()
+                        .setTitle("Here is a list of all our commands")
+                        .setColor("#ff0000");
+                }
+                index++;
+            }
+
+
         }
         msgObj.author.send(helpEmbed);
         let confirmationEmbed = new discord.RichEmbed()

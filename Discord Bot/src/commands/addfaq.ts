@@ -9,10 +9,13 @@ import { faqMessage } from '../models/faq/faqMessage';
 import { faqHandler } from '../handlers/faqHandler';
 import * as api from '../api'
 import { faqDialogue } from "../dialogues/faqDialogue";
+import BaseCommand from '../baseCommand';
 
-export default class AddFaqCommand implements IBotCommand {
+export default class AddFaqCommand extends BaseCommand  {
 
-    private readonly CMD_REGEXP = /^\?addfaq/im
+    constructor(){
+        super(/^\?addfaq/im);
+    }
 
     public getHelp(): IBotCommandHelp {
         return { caption: '?addfaq', description: 'ADMIN ONLY - Creates a new entry to the FAQ channel, follow the prompts', roles: ["admin"] }
@@ -22,35 +25,8 @@ export default class AddFaqCommand implements IBotCommand {
         return true;
     }
 
-    public init(bot: IBot, dataPath: string): void {
-     }
-
-    public isValid(msg: string): boolean {
-        return this.CMD_REGEXP.test(msg)
-    }
-
-    public canUseCommand(roles: discord.Role[]) {
-        let helpObj: IBotCommandHelp = this.getHelp();
-        let canUseCommand = true;
-
-        if (helpObj.roles != null && helpObj.roles.length > 0) {
-            canUseCommand = false;
-
-            for (var cmdRole in helpObj.roles) {
-                if (roles.find(role => role.name.toLowerCase() == cmdRole.toLowerCase()))
-                    canUseCommand = true;
-            }
-        }
-
-        return canUseCommand;
-    }
-
     public async process(messageContent: string, answer: IBotMessage, message: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
-        if (!message.member.hasPermission("MANAGE_MESSAGES")) {
-            message.channel.send("You don't have the privileges to add to the FAQ channel!"); //Makes sure the user has the correct permissions to be able to use this command
-            return;
-        }
-
+        
         let faqModel = new faq();
         let dialogue = new faqDialogue(config, message.channel as discord.TextChannel, message.member, client);
 

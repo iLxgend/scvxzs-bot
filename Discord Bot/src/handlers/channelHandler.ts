@@ -35,35 +35,7 @@ export class channelhandler {
             if (!category) await message.guild.createChannel('Tickets', 'category').then(p => category = p as discord.CategoryChannel);
 
             // Create channel for ticket
-            return await message.guild.createChannel(`ticket${ticketId}`, 'text', [
-
-                // Give ticket creator permissions to the channel
-                {
-                    id: message.author.id,
-                    deny: ['MANAGE_MESSAGES'],
-                    allow: ['READ_MESSAGE_HISTORY', "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS"]
-                },
-
-                // Give admins access to the channel
-                {
-                    id: adminRole.id,
-                    deny: [],
-                    allow: ['READ_MESSAGE_HISTORY', "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "MANAGE_MESSAGES"]
-                },
-
-                // Give Dapper Bot access to the channel
-                {
-                    id: dapperRole.id,
-                    deny: [],
-                    allow: ['READ_MESSAGE_HISTORY', "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "MANAGE_MESSAGES"]
-                },
-                
-                // Deny other users
-                {
-                    id: message.guild.id,
-                    deny: ['MANAGE_MESSAGES','SEND_MESSAGES', "VIEW_CHANNEL"],
-                    allow: []
-                }])
+            return await message.guild.createChannel(`ticket${ticketId}`, 'text')
 
                 // If ticket channel is created
                 .then(async channel => {
@@ -71,11 +43,43 @@ export class channelhandler {
                     // Set parent to the category channel
                     await channel.setParent(category);
 
+                    // Add permissions for creator
+                    channel.overwritePermissions(message.author, {
+                        "READ_MESSAGE_HISTORY": true,
+                        "SEND_MESSAGES": true,
+                        "VIEW_CHANNEL": true,
+                        "EMBED_LINKS": true,
+                    });
+
+                    // Add permissions for admins
+                    channel.overwritePermissions(adminRole, {
+                        "READ_MESSAGE_HISTORY": true,
+                        "SEND_MESSAGES": true,
+                        "VIEW_CHANNEL": true,
+                        "EMBED_LINKS": true,
+                    });
+
+                    // Add permissions for dapper bot
+                    channel.overwritePermissions(dapperRole, {
+                        "READ_MESSAGE_HISTORY": true,
+                        "SEND_MESSAGES": true,
+                        "VIEW_CHANNEL": true,
+                        "EMBED_LINKS": true,
+                    });
+
+                    // Remove permissions for everyone else
+                    channel.overwritePermissions(message.guild.id, {
+                        "READ_MESSAGE_HISTORY": false,
+                        "SEND_MESSAGES": false,
+                        "VIEW_CHANNEL": false,
+                    });
+
                     let ticketChannelEmbed = new discord.RichEmbed()
                         .setTitle(`Hello ${message.author.username}, welcome to our Ticket managing service!`)
                         .setThumbnail("https://dapperdino.co.uk/images/dapperbot.png")
                         .setDescription("We have received your ticket and have notified all Happy-To-Help members.")
                         .setColor("#2dff2d")
+                        .addField("Information", "Please provide us with as much information as possible. Send at least your code and the error or a screenshot of your entire vscode window.")
                         .addField("Please be patient whilst waiting for a helper to respond.", "Once you have finished your discussion and your question has been answered please use the command:\n__**?closeTicket**__")
                         .addField("When your ticket is accepted you will be notified here", "Just remember to be patient and well mannered as these members are giving up their own time to help you")
                         .setFooter("In the meantime you can start explaining your problems here as the Happy-To-Help member will be able to read all messages in the channel when they join");
