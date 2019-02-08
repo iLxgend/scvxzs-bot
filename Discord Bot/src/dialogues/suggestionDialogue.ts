@@ -43,10 +43,10 @@ export class suggestionDialogue {
     /**
      * addDescription
      */
-    public addDescription(response: string, data: suggestionDialogueData) {
+    public addDescription(response: discord.Message, data: suggestionDialogueData) {
         return new Promise<suggestionDialogueData>((resolve, reject) => {
             try {
-                data.description = response;
+                data.description = response.content;
                 return resolve(data);
             } catch (e) {
                 return reject(e);

@@ -20,7 +20,7 @@ export class websiteBotService {
         this._serverBot = serverBot;
         this._config = config;
         this._server = server;
-        
+
     }
 
     startupService = () => {
@@ -47,7 +47,7 @@ export class websiteBotService {
         });
 
         // On 'SuggestionUpdate' -> fires when suggestion is updated on the website
-        connection.on("SuggestionUpdate", (suggestion:suggest) => {
+        connection.on("SuggestionUpdate", (suggestion: suggest) => {
 
             // Get user that suggested this suggestion
             let suggestor = this._serverBot.users.get(suggestion.discordUser.discordId);
@@ -55,25 +55,25 @@ export class websiteBotService {
             // Check if found
             if (suggestor) {
 
-                let suggestionTypeText = (type:number) => {
-                    switch(type) {
+                let suggestionTypeText = (type: number) => {
+                    switch (type) {
                         case 0: return "Bot";
                         case 1: return "Website";
                         case 2: return "General";
                         case 3: return "YouTube";
                         case 4: return "Undecided";
-                        default:return "Undecided";
+                        default: return "Undecided";
                     }
                 }
 
-                let suggestionStatusText = (type:number) => {
-                    switch(type) {
+                let suggestionStatusText = (type: number) => {
+                    switch (type) {
                         case 0: return "Abandoned";
                         case 1: return "WorkInProgress";
                         case 2: return "InConsideration";
                         case 3: return "Completed";
                         case 4: return "Future";
-                        default:return "NotLookedAt";
+                        default: return "NotLookedAt";
                     }
                 }
 
@@ -141,9 +141,45 @@ export class websiteBotService {
         });
 
 
+        connection.on("ProductEnquiry", (productEnquiry) => {
+            let dapperCodingTeam = this.GetAllWithRole("dappercoding");
+            let enquiryEmbed = new discord.RichEmbed()
+                .setTitle(`A user has requested contact regarding the ${productEnquiry.product}`)
+                .setColor("0x00ff00")
+                .addField("The user", productEnquiry.discordId)
+                .setFooter("Please dm this user asap - or dm Mick");
 
-         // On 'AcceptedApplicant' -> when admin accepts a h2h member through the admin panel
-         connection.on("AcceptedApplicant", async (accepted) => {
+            try {
+                dapperCodingTeam.forEach(member => {
+                    member.send(enquiryEmbed);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+
+
+            let testUser = this._serverBot.users.find(user=> user.tag == productEnquiry.discordId);
+            if (testUser) {
+                try {
+                    let productEnquiryEmbed = new discord.RichEmbed()
+                        .setTitle("Thanks for your requesting contact!")
+                        .setColor("0xff0000")
+                        .addField("Information", `You'll receive more information about ${productEnquiry.product}`)
+                        .setFooter("With ❤ by the DapperCoding team");
+                    testUser.send(productEnquiryEmbed)
+                        .catch(console.error);
+                } catch (e) {
+
+                }
+
+            }
+            return true;
+        });
+
+
+
+        // On 'AcceptedApplicant' -> when admin accepts a h2h member through the admin panel
+        connection.on("AcceptedApplicant", async (accepted) => {
             let member = this._server.members.find(member => member.user.id == accepted.discordId);
             if (member == null) return true;
 
@@ -155,11 +191,11 @@ export class websiteBotService {
 
             let channel = this._server.channels.find(channel => channel.name.toLowerCase() == "dapper-team") as discord.TextChannel;
             if (channel == null) return false;
-            
+
             channel.send(`Please welcome ${member.user.username} to the team!`).catch(console.error);
 
-            
-         });
+
+        });
     }
 
 
@@ -176,7 +212,7 @@ export class websiteBotService {
         for (let i = 0; i < allUsers.length; i++) {
 
             //Check if any of their roles has the same name as the requested role
-            if (allUsers[i].roles.find((role) => role.name === requestedRole)) {
+            if (allUsers[i].roles.find((role) => role.name.toLowerCase() === requestedRole.toLowerCase())) {
 
                 //Add that member to the list
                 usersWithRole.push(allUsers[i]);
