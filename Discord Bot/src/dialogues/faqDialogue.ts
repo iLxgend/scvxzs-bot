@@ -124,7 +124,7 @@ export class faqDialogue {
             .setColor("#2dff2d")
 
             if (data.resourceLink != null && data.resourceLink.link != null && data.resourceLink.displayName != null)
-            faqEmbed.addField("Useful Resource: ", `["${data.resourceLink.displayName}"]("${data.resourceLink.link}")`);
+            faqEmbed.addField("Useful Resource: ", `[${data.resourceLink.displayName}](${data.resourceLink.link})`);
             new faqHandler(this._config)
             .addFaq(data)
                 .then(faqData => {
