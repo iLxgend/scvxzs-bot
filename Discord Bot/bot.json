@@ -24,7 +24,6 @@
         "ticketInfo",
         "closeTicket",
         "forceClose",
-        "acceptTicket",
         "ytdlFix",
         "openTickets",
         "debugger",

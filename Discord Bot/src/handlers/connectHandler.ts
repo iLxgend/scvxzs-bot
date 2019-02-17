@@ -11,31 +11,35 @@ export class connectHandler {
     private _client: discord.Client;
 
     constructor(client: discord.Client, config: api.IBotConfig) {
-        
+
         // Register config
         this._config = config;
         this._client = client;
     }
 
-    
+
     public async registerDiscord(message: discord.Message) {
 
         // Return new promise
-        return new Promise(async (resolve,reject)=> {
+        return new Promise(async (resolve, reject) => {
 
             // Register url
             let registerDiscordUrl = 'https://api.dapperdino.co.uk/api/Account/RegisterDiscord/';
 
             // Create new registerModel
             let model = new registerModel();
-    
+
             // Add user information
             model.username = message.author.username;
             model.discordId = message.author.id;
 
             // Add connect code
             model.registrationCode = message.content.replace("?connect ", "");
-    
+
+            if (message.member.roles.find(role => role.name.toLowerCase() === "happy to help")) {
+                model.isHappyToHelp = true;
+            }
+
             // Request API
             try {
                 const discordAccount = await new apiRequestHandler(this._client, this._config)
@@ -55,11 +59,11 @@ export class connectHandler {
         });
     }
 
-    public async sendOkMessage(message:discord.Message, model) {
+    public async sendOkMessage(message: discord.Message, model) {
         message.reply("You have successfully connected your discord account");
     }
 
-    public async sendRejectMessage(message:discord.Message, reason) {
+    public async sendRejectMessage(message: discord.Message, reason) {
         message.reply(reason);
     }
 }

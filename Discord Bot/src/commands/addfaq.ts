@@ -18,7 +18,7 @@ export default class AddFaqCommand extends BaseCommand  {
     }
 
     public getHelp(): IBotCommandHelp {
-        return { caption: '?addfaq', description: 'ADMIN ONLY - Creates a new entry to the FAQ channel, follow the prompts', roles: ["admin"] }
+        return { caption: '?addfaq', description: 'Creates a new entry to the FAQ channel, follow the prompts', roles: ["admin", "happy to help"] }
     }
     
     public canUseInChannel(channel:discord.TextChannel): boolean {

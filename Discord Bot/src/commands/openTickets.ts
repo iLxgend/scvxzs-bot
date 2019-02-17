@@ -59,7 +59,9 @@ export default class BotInfoCommand implements IBotCommand {
                     if (channel == null) continue;
 
                     embed.addField(`Ticket${ticket.id} (${ticket.count} team member(s) helping)`, ticket.subject);
-                    if (i == 25) {
+
+                    // Yikes 25 field fix
+                    if (i % 25 == 0) {
                         message.author.send(embed);
                         embed = new discord.RichEmbed()
                             .setColor("#ff0000")

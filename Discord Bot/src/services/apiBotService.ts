@@ -6,6 +6,7 @@ import { email } from '../models/email';
 import * as aspnet from '@aspnet/signalr';
 import { faqMessage } from '../models/faq/faqMessage';
 import { ticket } from '../models/ticket/ticket';
+import { suggest } from '../models/suggest';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -81,6 +82,58 @@ export class apiBotService {
         // On 'TicketReaction' -> fires when ticket reaction has been added to an existing ticket
         connection.on("TicketReaction", async (reaction) => {
             
+        });
+
+        // On 'Suggestion' -> fires when someone suggested something using the website
+        connection.on("Suggestion", (suggestion: suggest) => {
+
+            // Get user that suggested this suggestion
+            const suggestor = this._serverBot.users.get(suggestion.discordUser.discordId);
+
+            let suggestionTypeText = (type: number) => {
+                switch (type) {
+                    case 0: return "Bot";
+                    case 1: return "Website";
+                    case 2: return "General";
+                    case 3: return "YouTube";
+                    case 4: return "Undecided";
+                    default: return "Undecided";
+                }
+            }
+    
+            let suggestionStatusText = (type: number) => {
+                switch (type) {
+                    case 0: return "Abandoned";
+                    case 1: return "WorkInProgress";
+                    case 2: return "InConsideration";
+                    case 3: return "Completed";
+                    case 4: return "Future";
+                    default: return "NotLookedAt";
+                }
+            }
+
+            // Create suggestion embed
+            const suggestionEmbed = new discord.RichEmbed({})
+                .setTitle("Your suggestion has been created!")
+                .setColor("0xff0000")
+                .addField("Here you will find the information about the suggestion:", `https://dapperdino.co.uk/Client/Suggestion/${suggestion.id}`)
+                .addField("Suggestion description:", suggestion.description)
+                .addField("Suggestion Type:", suggestionTypeText(suggestion.type))
+                .addField("Suggestion Status:", suggestionStatusText(suggestion.status))
+                .addField("Thanks as always for being a part of the community.", "It means a lot!")
+                .setFooter("With ❤ the DapperCoding team");
+            // Check if found
+            if (suggestor) {
+                // Send embed to suggestor
+                suggestor.send(suggestionEmbed)
+                    .catch(console.error)
+
+                suggestionEmbed.setTitle(`${suggestor.username} suggested something.`);
+                suggestionEmbed.setDescription(`Happy To Help link: https://dapperdino.co.uk/HappyToHelp/Suggestion/${suggestion.id}`)
+                const h2hChat = this._server.channels.find(channel => channel.name.toLowerCase() === "dapper-team") as discord.TextChannel;
+
+                h2hChat.send(suggestionEmbed);
+            }
         });
 
         // On 'ReceiveMessage' -> test method

@@ -25,7 +25,7 @@ export default class RegisterCommand extends BaseCommand {
 
     public async process(msg: string, answer: IBotMessage, msgObj: discord.Message, client: discord.Client, config: IBotConfig, commands: IBotCommand[]): Promise<void> {
         
-        if (msg.toLowerCase().trim() !== "?connect") {
+        if (msg.toLowerCase().trim() === "?connect") {
             let model = false;
             let dialogue = new connectDialogue(config, msgObj.channel as discord.TextChannel, msgObj.member, client);
 
