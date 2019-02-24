@@ -89,7 +89,7 @@ export default class RTFMCommand implements IBotCommand {
         return new discord.RichEmbed()
             .setColor("#ff0000")
             .setTitle(`You have been summoned by ${message.author.username}`)
-            .setDescription(`This is just a notification`)
+            .setDescription(`Please join the conversation over at #${(message.channel as discord.TextChannel).name}`)
             .setFooter("Have a great 2019!")
     }
 }
