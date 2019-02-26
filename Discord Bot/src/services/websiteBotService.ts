@@ -186,7 +186,7 @@ export class websiteBotService {
                 .setTitle(`A user has requested contact regarding the ${productEnquiry.product}`)
                 .setColor("0x00ff00")
                 .addField("The user", productEnquiry.discordId)
-                .setFooter("Please dm this user asap - or dm Mick");
+                .setFooter("Please DM this user asap - or DM Mick");
 
             try {
                 dapperCodingTeam.forEach(member => {

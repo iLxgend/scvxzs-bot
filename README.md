@@ -35,7 +35,7 @@ Then run the bot with 'node .' in the console window and hope for the best :D
 ## Authors
 
 * **Nathan Farrer** - *Bot Creator* - [Dapper Dino](https://github.com/DapperDino)
-* **mickie456** - *Website Backend* - [mickie456](https://github.com/mickie456)
+* **Mick Rustenhoven** - *Website Backend* - [mickie456](https://github.com/mickie456)
 
 ## License
 
