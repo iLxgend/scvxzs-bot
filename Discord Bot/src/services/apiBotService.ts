@@ -35,8 +35,17 @@ export class apiBotService {
             .then(console.log)
             .catch(err => console.error(err.toString()));
 
+        // Auto reconnect
+        connection.onclose(() => {
+            setTimeout(function () {
+                connection.start()
+                    .then(() => console.log("t"))
+                    .catch(err => console.error(err.toString()));
+            }, 3000);
+        });
+
         // On 'TicketCreated' -> fires when ticket is created through API
-        connection.on("TicketCreated", async (ticket:ticket) => {
+        connection.on("TicketCreated", async (ticket: ticket) => {
             console.log('hi')
             // Get all members with happy to help (h2h) role
             let happyToHelpers = this.GetAllWithRole("Happy To Help");
@@ -81,7 +90,7 @@ export class apiBotService {
 
         // On 'TicketReaction' -> fires when ticket reaction has been added to an existing ticket
         connection.on("TicketReaction", async (reaction) => {
-            
+
         });
 
         // On 'Suggestion' -> fires when someone suggested something using the website
@@ -100,7 +109,7 @@ export class apiBotService {
                     default: return "Undecided";
                 }
             }
-    
+
             let suggestionStatusText = (type: number) => {
                 switch (type) {
                     case 0: return "Abandoned";

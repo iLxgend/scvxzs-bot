@@ -38,6 +38,15 @@ export class websiteBotService {
             .then(() => console.log("t"))
             .catch(err => console.error(err.toString()));
 
+        // Auto reconnect
+        connection.onclose(() => {
+            setTimeout(function () {
+                connection.start()
+                    .then(() => console.log("t"))
+                    .catch(err => console.error(err.toString()));
+            }, 3000);
+        });
+        
         // On 'ReceiveMessage' -> test method
         connection.on("ReceiveMessage", (user, message) => {
             let testUser = this._serverBot.users.get(this.GetDiscordUserByUsername(user).discordId);
@@ -72,6 +81,8 @@ export class websiteBotService {
                 suggestor.send(suggestionUpdateEmbed)
                     .catch(console.error)
             }
+
+            return true;
         });
 
         let suggestionTypeText = (type: number) => {
@@ -124,6 +135,8 @@ export class websiteBotService {
 
                 h2hChat.send(suggestionEmbed);
             }
+
+            return true;
         });
 
 
@@ -143,34 +156,26 @@ export class websiteBotService {
                 // Try to find discordMessage with id of updated faq item
                 let message = await channel.fetchMessage(faq.discordMessage.messageId);
 
+                // Create faq embed
+                let faqEmbed = new discord.RichEmbed()
+                    .setTitle("-Q: " + faq.question)
+                    .setDescription("-A: " + faq.answer)
+                    .setColor("#2dff2d")
+
+                // Check if resource link is present
+                if (faq.resourceLink != null) {
+
+                    // Add resource link to faq embed
+                    faqEmbed.addField("Useful Resource: ", `[${faq.resourceLink.displayName}](${faq.resourceLink.link})`);
+                }
+
                 // Try to delete discordMessage, then add the updated version
                 message
-                    .delete()
-                    .then(() => {
-
-                        // Create faq embed
-                        let faqEmbed = new discord.RichEmbed()
-                            .setTitle("-Q: " + faq.question)
-                            .setDescription("-A: " + faq.answer)
-                            .setColor("#2dff2d")
-
-                        // Check if resource link is present
-                        if (faq.resourceLink != null) {
-
-                            // Add resource link to faq embed
-                            faqEmbed.addField("Useful Resource: ", "[" + faq.resourceLink.displayName + "](" + faq.resourceLink.link + ")");
-                        }
-
-                        // Send updated version of embed
-                        channel
-                            .send(faqEmbed)
-                            .then((newMsg) => {
-                                let handler = new faqHandler(this._config);
-                                // Set FAQ discordMessage id in db through api when updated
-                                handler.setFaqMessageId((newMsg as discord.Message), faq.id, this._config)
-                            });
-                    })
+                    .edit(faqEmbed)
+                    .then(console.log)
                     .catch(console.error);
+
+                return true;
             }
         });
 
@@ -215,7 +220,7 @@ export class websiteBotService {
             const channel = this._server.channels.find(channel => channel.name.toLowerCase() === "dapper-coding") as discord.TextChannel;
             const discordUser = this._server.members.get(enquiry.discordId)
 
-            if (channel == null) return;
+            if (channel == null) return true;
 
 
             let dapperCodingTeam = this.GetAllWithRole("dappercoding");
@@ -325,7 +330,7 @@ export class websiteBotService {
 
             channel.send(`Please welcome ${member.user.username} to the team!`).catch(console.error);
 
-
+            return true;
         });
     }
 

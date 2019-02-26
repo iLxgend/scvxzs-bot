@@ -47,9 +47,9 @@ export default class RegisterCommand implements IBotCommand {
 
                 // Add ticket info
                 let ticketEmbed = new discord.RichEmbed()
-                    .setTitle("Subject: " + ticket.subject)
+                    .setTitle("Subject: " + ticket.subject + ".")
                     .setColor('#ffdd05')
-                    .addField("Description:", ticket.description)
+                    .addField("Description:", ticket.description + ".")
                     .setFooter("Thanks for all your help :)");
 
                 curChannel.send(ticketEmbed);

@@ -46,9 +46,6 @@ export default class forceCloseTicketCommand implements IBotCommand {
         // Get ticket channel id from channel name
         let ticketChannelId = ((message.channel as discord.TextChannel).name.toString().replace("ticket", "")).toString();
         
-        // Check if user has permissions
-        if (message.member.roles.find((e) => e.name == "Happy To Help" || e.name == "Admin") == null) return;
-
         // Delete discordMessage
         message.channel.delete();
 
