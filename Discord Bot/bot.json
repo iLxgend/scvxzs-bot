@@ -32,7 +32,8 @@
         "code",
         "error",
         "free",
-        "privateChannel"
+        "privateChannel",
+        "meme"
     ],
     "token": "create bot.prod.json at same folder and put discord token to 'token' property inside",
     "serverId": "create bot.prod.json at same folder and put your report channel's id inside",
