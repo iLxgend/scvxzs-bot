@@ -9,6 +9,10 @@ import { faqHandler } from '../handlers/faqHandler';
 import { suggest } from '../models/suggest';
 import { hostingEnquiry } from '../models/signalr/hostingEnquiry';
 import { Application } from '../models/signalr/application';
+import { ticketReaction } from '../models/ticket/ticketReaction';
+import { message } from '../models/message';
+import TicketEmbed from '../models/ticket/ticketEmbed';
+import { channelhandler } from '../handlers/channelHandler';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -55,6 +59,57 @@ export class websiteBotService {
                     .send(message)
                     .catch(console.error)
             }
+        });
+
+        // On 'AddTicketReaction' -> test method
+        connection.on("AddTicketReaction", (unsentTicketReaction) => {
+        
+            // Get ticket channel
+            let channel = this._server.channels.find(c => c.name == `ticket${unsentTicketReaction.ticketId}`) as discord.TextChannel;
+
+            if (!channel) return true;
+            
+            let fromUser = this._server.members.get(unsentTicketReaction.discordId);
+
+            if (!fromUser) return true;
+
+            let reactionEmbed = new discord.RichEmbed()
+                .setTitle(`Message from ${fromUser.user.username}`)
+                .setDescription(unsentTicketReaction.message)
+                .setThumbnail(fromUser.user.avatarURL ? fromUser.user.avatarURL : this._serverBot.user.avatarURL);
+                
+
+            // Send message if exists
+            channel.send(reactionEmbed).then(msg => {
+                let reaction = new ticketReaction();
+                msg = msg as discord.Message;
+
+                // Fill ticket reaction model
+                reaction.ticketId = unsentTicketReaction.ticketId;
+                reaction.fromId = unsentTicketReaction.discordId; // use info from unsent
+                reaction.username = unsentTicketReaction.username; // use info from unsent
+    
+                reaction.discordMessage = new message();
+    
+                reaction.discordMessage.message = unsentTicketReaction.message;
+                reaction.discordMessage.messageId = msg.id;
+                reaction.discordMessage.timestamp = new Date(msg.createdTimestamp);
+                reaction.discordMessage.guildId = msg.guild.id;
+                reaction.discordMessage.channelId = msg.channel.id;
+                reaction.discordMessage.isEmbed = false;
+                reaction.discordMessage.isDm = false;
+
+                // Request API and add our reaction to the database.
+                new apiRequestHandler().requestAPI('POST', reaction, 'https://api.dapperdino.co.uk/api/ticket/reaction', this._config);
+            });
+
+            // Send message to api
+            // Get ticket channel id from channel name
+            
+
+           
+
+            
         });
 
         // On 'SuggestionUpdate' -> fires when suggestion is updated on the website
@@ -332,6 +387,239 @@ export class websiteBotService {
 
             return true;
         });
+
+
+        // ***** Ticket system actions
+
+
+        // Close
+        connection.on("CloseTicket", async (info:TicketEmbed) => {
+            let information = info as TicketEmbed;
+            let channel = this.GetChannel(`ticket${info.ticket.id}`);
+
+            if (channel) {
+                channel.delete("Closed through ticket portal (web)")
+            }
+
+            let completedTicketEmbed = new discord.RichEmbed()
+                .setTitle(`Ticket ${information.ticket.id} has been completed!`)
+                .setColor("#ff0000")
+                .setDescription(`${information.ticket.applicant.username}'s problem has now been resolved, good job`)
+
+
+            // Get completed tickets channel
+            let completedTicketsChannel = this.GetChannel("completed-tickets") as discord.TextChannel;
+
+            if (!completedTicketsChannel) return ("Channel not found");
+
+            //Send the embed to completed tickets channel
+            completedTicketsChannel.send(completedTicketEmbed)
+        })
+
+        // Close embed
+        connection.on("CloseTicketEmbed", async (info:TicketEmbed) => {
+            
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            if (!channel) {
+                return true;
+            }
+
+            let user = this._server.members.get(info.user.discordId);
+
+            if (!user) {
+                return true;
+            }
+
+            // Create embed that tells the creator to close the ticket
+            let endTicketEmbed = new discord.RichEmbed()
+                .setTitle(`${info.user.username} thinks that this ticket can be closed now`)
+                .setThumbnail(user.user.avatarURL)
+                .setColor("#2dff2d")
+                .setDescription("If you agree that this ticket should be closed then please type the following command:\n__**?closeTicket**__")
+
+            channel.send(endTicketEmbed);
+        })
+
+        // Error
+        connection.on("Error", async (info:TicketEmbed) => {
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            if (!channel) {
+                return true;
+            }
+
+            let user = this._server.members.get(info.user.discordId);
+
+            if (!user) {
+                return true;
+            }
+
+
+            let applicant = this._server.members.get(info.ticket.applicant.discordId);
+
+            if (!applicant) {
+                return true;
+            }
+
+            // Create embed that tells the creator to send their errors
+            let errorEmbed = new discord.RichEmbed()
+                .setColor("#ff0000")
+                .setTitle(`Please send us your errors`)
+                .setDescription(`${user.user.username} asks you to send your errors`)
+                .addField("Screenshot", "Please send us a screenshot of your error too", false)
+                .addField("Notification", `${applicant.user}`, false)
+                .setFooter("Thanks in advance!");
+        
+                errorEmbed.setThumbnail(user.user.avatarURL ? user.user.avatarURL : this._serverBot.user.avatarURL);
+
+            channel.send(errorEmbed);
+        })
+
+        // Help
+        connection.on("Code", async (info:TicketEmbed) => {
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            if (!channel) {
+                return true;
+            }
+
+            let user = this._server.members.get(info.user.discordId);
+
+            if (!user) {
+                return true;
+            }
+
+
+            let applicant = this._server.members.get(info.ticket.applicant.discordId);
+
+            if (!applicant) {
+                return true;
+            }
+
+            // Create embed that tells the creator to send their errors
+            let errorEmbed = new discord.RichEmbed()
+                .setColor("#00ff00")
+                .setTitle(`Please send us your code`)
+                .setDescription(`${user.user.username} asks you to send your code`)
+                .addField("As text", "Please send your code using codeblocks or sites like hastebin.", false)
+                .addField("Notification", `${applicant.user}`, false)
+                .setFooter("Thanks in advance!");
+        
+                errorEmbed.setThumbnail(user.user.avatarURL ? user.user.avatarURL : this._serverBot.user.avatarURL);
+
+            channel.send(errorEmbed);
+        })
+
+        // YtdlFix
+        connection.on("YtdlFix", async (info:TicketEmbed) => {
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            if (!channel) {
+                return true;
+            }
+
+            let user = this._server.members.get(info.user.discordId);
+
+            if (!user) {
+                return true;
+            }
+            let url = 'https://dapperdino.co.uk/ytdl-fix.zip';
+            
+             
+            // Create embed that tells the creator to close the ticket
+            let ytdlfixEmbed = new discord.RichEmbed()
+                .setColor("#ff0000")
+                .setTitle("The YTDL Fix")
+                .setURL(url)
+                .addField("Please download the zip file " + info.ticket.applicant.username + ".", info.user.username + " asks you to download the zip file and extract the files to your node_modules folder (overwrite files).")
+                .addField("Video explanation:", "https://www.youtube.com/watch?v=MsMYrxyYNZc")
+                .setFooter("If you keep experiencing errors, feel free to ask your question in a ticket.")
+
+            channel.send(ytdlfixEmbed);
+            return true;
+        })
+
+        // Debugger
+        connection.on("Debugger", async (info:TicketEmbed) => {
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            if (!channel) {
+                return true;
+            }
+
+            let user = this._server.members.get(info.user.discordId);
+
+            if (!user) {
+                return true;
+            }
+
+            // Create embed that tells the creator to close the ticket
+            let endTicketEmbed = new discord.RichEmbed()
+                .setColor("#ff0000")
+                .setTitle(`Hey ${info.ticket.applicant.username} - just a tip`)
+                .setDescription('We think you should use a debugging tool, you can find a video about how to use them just below.')
+                .addField('documentation:','https://code.visualstudio.com/docs/nodejs/nodejs-debugging')
+                .addField("video:", 'https://www.youtube.com/watch?v=2oFKNL7vYV8')
+                .setFooter("Thanks in advance!")
+                
+
+            channel.send(endTicketEmbed);
+        })
+
+        // Accept
+        connection.on("AcceptTicket", async (info:TicketEmbed) => {
+
+            console.log(info);
+            // let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+
+            // if (!channel) {
+            //     return true;
+            // }
+
+            // let user = this._server.members.get(info.user.discordId);
+
+            // if (!user) {
+            //     return true;
+            // }
+
+            // // Add premissions to channel for h2h-er 
+            // channel.overwritePermissions(user, {
+            //     "READ_MESSAGE_HISTORY": true,
+            //     "SEND_MESSAGES": true,
+            //     "VIEW_CHANNEL": true,
+            //     "EMBED_LINKS": true,
+            // });
+
+            // let acceptedTicketembed = new discord.RichEmbed()
+            //         .setTitle(`${info.user.username} is here to help you!`)
+            //         .setThumbnail(user.user.avatarURL)
+            //         .setColor("#2dff2d")
+            //         .setDescription("Please treat them nicely and they will treat you nicely back :)");
+
+            // (channel as discord.TextChannel).send(acceptedTicketembed);
+
+            // //Create embed for helpers to know that the ticket is closed
+            // let inProgressEmbed = new discord.RichEmbed()
+            //     .setTitle(`Ticket ${info.ticket.id} has been accepted by ${user.displayName}!`)
+            //     .setColor('#ffdd05')
+            //     .setDescription(`Thank you for your time and efforts :)`)
+
+            // //If the user has a profile pic we will set it in the embed
+            // if (user.user.avatarURL != null) {
+            //     inProgressEmbed.setThumbnail(user.user.avatarURL);
+            // }
+
+            // // Get completed tickets channel
+            // let inProgressChannel = this._server.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
+
+            // if (!inProgressChannel) return ("Channel not found");
+
+            // //Send the embed to completed tickets channel
+            // inProgressChannel.send(inProgressEmbed)
+            
+        })
+
     }
 
 
@@ -357,6 +645,10 @@ export class websiteBotService {
 
         //Return all the members that have the role
         return usersWithRole;
+    }
+
+    private GetChannel(name:string) { 
+        return this._server.channels.find(x=>x.name == name);
     }
 
     // Get server population

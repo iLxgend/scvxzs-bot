@@ -59,11 +59,14 @@ export class apiBotService {
                     .setDescription(ticket.applicant.username + " is in need of help!")
                     .setColor('#ffdd05')
                     .addField("Their description:", ticket.description)
-                    .addField("Thank you " + happyToHelpers[i].displayName + " for being willing to assist others in our server. If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                    .addField("Thank you ", happyToHelpers[i].displayName + " for being willing to assist others in our server.")
+                    .addField("Ticket Portal V0.1", `To read all messages sent in this ticket, click on the title of this embed to open the ticket in the Ticket Portal.`)
+                    .addField("If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                    .setURL(`https://dapperdino.co.uk/HappyToHelp/Ticket?id=${ticket.id}`)
                     .setFooter("Thanks for all your help :)");
 
                 // Send ticket embed to h2h-er
-                happyToHelpers[i].send(ticketEmbed);
+                happyToHelpers[i].send(ticketEmbed).catch(console.error);
             }
             // Get current guild
             let guild = this._serverBot.guilds.get(this._config.serverId);
@@ -75,7 +78,9 @@ export class apiBotService {
                 .setTitle("Ticket: " + ticket.subject + ", has been created")
                 .setColor("#2dff2d")
                 .addField("Their description:", ticket.description)
+                .addField("Ticket Portal V0.1", `To read all messages sent in this ticket, click on the title of this embed to open the ticket in the Ticket Portal.`)
                 .addField("If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                .setURL(`https://dapperdino.co.uk/HappyToHelp/Ticket?id=${ticket.id}`)
                 .setFooter("Thanks for all your help :)");
 
 

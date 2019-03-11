@@ -58,7 +58,7 @@ export default class BotInfoCommand implements IBotCommand {
                     // TODO: ticket might be closed
                     if (channel == null) continue;
 
-                    embed.addField(`Ticket${ticket.id} (${ticket.count} team member(s) helping)`, ticket.subject);
+                    embed.addField(`Ticket${ticket.id} (${ticket.count} team member(s) helping)`, ticket.subject + "\n https://dapperdino.co.uk/HappyToHelp/Ticket?id=" + ticket.id);
 
                     // Yikes 25 field fix
                     if (i % 25 == 0) {
