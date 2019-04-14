@@ -73,7 +73,7 @@ export default class TicketCommand implements IBotCommand {
         let titleStep: dialogueStep<ticketDialogueData> = new dialogueStep(
             collectedInfo,
             d.titleStep,
-            "Enter a title for your ticket that quickly summarises what you are requiring assistance with:",
+            "Enter a title for your ticket that quickly summarises what you are requiring assistance with: (20 - 100)",
             "Title Successful",
             "Title Unsuccessful");
 
@@ -81,7 +81,7 @@ export default class TicketCommand implements IBotCommand {
         let descriptionStep: dialogueStep<ticketDialogueData> = new dialogueStep(
             collectedInfo,
             d.descriptionStep,
-            "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with:",
+            "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with: (60 - 700)",
             "Description Successful",
             "Description Unsuccessful",);
 
@@ -151,7 +151,7 @@ export default class TicketCommand implements IBotCommand {
                     new channelhandler(this._guild)
 
                     // Add author to ticket
-                    .createChannelTicketCommand(ticket.id, message);
+                    .createChannelTicketCommand(ticket.id, message.member);
                 }
             });
 

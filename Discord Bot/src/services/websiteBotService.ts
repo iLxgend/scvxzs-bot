@@ -13,6 +13,8 @@ import { ticketReaction } from '../models/ticket/ticketReaction';
 import { message } from '../models/message';
 import TicketEmbed from '../models/ticket/ticketEmbed';
 import { channelhandler } from '../handlers/channelHandler';
+import { ticket } from '../models/ticket/ticket';
+import { discordUser } from '../models/discordUser';
 
 (<any>global).XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
@@ -102,14 +104,73 @@ export class websiteBotService {
                 // Request API and add our reaction to the database.
                 new apiRequestHandler().requestAPI('POST', reaction, 'https://api.dapperdino.co.uk/api/ticket/reaction', this._config);
             });
+        });
 
-            // Send message to api
-            // Get ticket channel id from channel name
+        // Add ticket channel, send correct messages
+        connection.on("AddTicket", (ticket:ticket) => {
             
+            // Create new channel handler
+            let handler = new channelhandler(this._server);
 
-           
+            // Get applicant as memebr
+            let user = this._server.members.find(member => member.user.id === ticket.applicant.discordId);
 
-            
+            // Check if ticket channel doesn't already exist
+            if (!this._server.channels.find(channel=> channel.name === `ticket-${ticket.id}`)) {
+
+                // Create ticket channel
+                handler.createChannelTicketCommand(ticket.id, user);
+
+            }
+        })
+
+        // On 'TicketCreated' -> fires when ticket is created through API
+        connection.on("TicketCreated", async (ticket: ticket) => {
+            console.log('hi')
+            // Get all members with happy to help (h2h) role
+            let happyToHelpers = this.GetAllWithRole("Happy To Help");
+
+            // Loop over all h2h-ers
+            for (let i = 0; i < happyToHelpers.length; i++) {
+
+                // Create ticket embed
+                let ticketEmbed = new discord.RichEmbed()
+                    .setTitle("Ticket: " + ticket.subject + ", has been created")
+                    .setDescription(ticket.applicant.username + " is in need of help!")
+                    .setColor('#ffdd05')
+                    .addField("Their description:", ticket.description)
+                    .addField("Thank you ", happyToHelpers[i].displayName + " for being willing to assist others in our server.")
+                    .addField("Ticket Portal V0.1", `To read all messages sent in this ticket, click on the title of this embed to open the ticket in the Ticket Portal.`)
+                    .addField("If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                    .setURL(`https://dapperdino.co.uk/HappyToHelp/Ticket?id=${ticket.id}`)
+                    .setFooter("Thanks for all your help :)");
+
+                // Send ticket embed to h2h-er
+                happyToHelpers[i].send(ticketEmbed).catch(console.error);
+            }
+            // Get current guild
+            let guild = this._serverBot.guilds.get(this._config.serverId);
+
+            if (!guild) return ("Server not found");
+
+            //Create embed for helpers to know that the ticket is closed
+            let acceptTicketEmbed = new discord.RichEmbed()
+                .setTitle("Ticket: " + ticket.subject + ", has been created")
+                .setColor("#2dff2d")
+                .addField("Their description:", ticket.description)
+                .addField("Ticket Portal V0.1", `To read all messages sent in this ticket, click on the title of this embed to open the ticket in the Ticket Portal.`)
+                .addField("If you would like to help with this request then please type:", "?acceptTicket " + ticket.id)
+                .setURL(`https://dapperdino.co.uk/HappyToHelp/Ticket?id=${ticket.id}`)
+                .setFooter("Thanks for all your help :)");
+
+
+            // Get tickets to accept channel
+            let ticketsToAcceptChannel = guild.channels.find(channel => channel.name === "tickets-to-accept") as discord.TextChannel;
+
+            if (!ticketsToAcceptChannel) return ("Channel not found");
+
+            //Send the embed to the tickets to accept channel
+            ticketsToAcceptChannel.send(acceptTicketEmbed)
         });
 
         // On 'SuggestionUpdate' -> fires when suggestion is updated on the website
@@ -570,53 +631,53 @@ export class websiteBotService {
         // Accept
         connection.on("AcceptTicket", async (info:TicketEmbed) => {
 
-            console.log(info);
-            // let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
+            // console.log(info);
+            let channel = this.GetChannel(`ticket${info.ticket.id}`) as discord.TextChannel;
 
-            // if (!channel) {
-            //     return true;
-            // }
+            if (!channel) {
+                return true;
+            }
 
-            // let user = this._server.members.get(info.user.discordId);
+            let user = this._server.members.get(info.user.discordId);
 
-            // if (!user) {
-            //     return true;
-            // }
+            if (!user) {
+                return true;
+            }
 
-            // // Add premissions to channel for h2h-er 
-            // channel.overwritePermissions(user, {
-            //     "READ_MESSAGE_HISTORY": true,
-            //     "SEND_MESSAGES": true,
-            //     "VIEW_CHANNEL": true,
-            //     "EMBED_LINKS": true,
-            // });
+            // Add premissions to channel for h2h-er 
+            channel.overwritePermissions(user, {
+                "READ_MESSAGE_HISTORY": true,
+                "SEND_MESSAGES": true,
+                "VIEW_CHANNEL": true,
+                "EMBED_LINKS": true,
+            });
 
-            // let acceptedTicketembed = new discord.RichEmbed()
-            //         .setTitle(`${info.user.username} is here to help you!`)
-            //         .setThumbnail(user.user.avatarURL)
-            //         .setColor("#2dff2d")
-            //         .setDescription("Please treat them nicely and they will treat you nicely back :)");
+            let acceptedTicketembed = new discord.RichEmbed()
+                    .setTitle(`${info.user.username} is here to help you!`)
+                    .setThumbnail(user.user.avatarURL)
+                    .setColor("#2dff2d")
+                    .setDescription("Please treat them nicely and they will treat you nicely back :)");
 
-            // (channel as discord.TextChannel).send(acceptedTicketembed);
+            (channel as discord.TextChannel).send(acceptedTicketembed);
 
-            // //Create embed for helpers to know that the ticket is closed
-            // let inProgressEmbed = new discord.RichEmbed()
-            //     .setTitle(`Ticket ${info.ticket.id} has been accepted by ${user.displayName}!`)
-            //     .setColor('#ffdd05')
-            //     .setDescription(`Thank you for your time and efforts :)`)
+            //Create embed for helpers to know that the ticket is closed
+            let inProgressEmbed = new discord.RichEmbed()
+                .setTitle(`Ticket ${info.ticket.id} has been accepted by ${user.displayName}!`)
+                .setColor('#ffdd05')
+                .setDescription(`Thank you for your time and efforts :)`)
 
-            // //If the user has a profile pic we will set it in the embed
-            // if (user.user.avatarURL != null) {
-            //     inProgressEmbed.setThumbnail(user.user.avatarURL);
-            // }
+            //If the user has a profile pic we will set it in the embed
+            if (user.user.avatarURL != null) {
+                inProgressEmbed.setThumbnail(user.user.avatarURL);
+            }
 
-            // // Get completed tickets channel
-            // let inProgressChannel = this._server.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
+            // Get completed tickets channel
+            let inProgressChannel = this._server.channels.find(channel => channel.name === "tickets-in-progress") as discord.TextChannel;
 
-            // if (!inProgressChannel) return ("Channel not found");
+            if (!inProgressChannel) return ("Channel not found");
 
-            // //Send the embed to completed tickets channel
-            // inProgressChannel.send(inProgressEmbed)
+            //Send the embed to completed tickets channel
+            inProgressChannel.send(inProgressEmbed)
             
         })
 
@@ -717,4 +778,6 @@ export class websiteBotService {
 
         /// THIS METHOD NEEDS TO BE REFACTORED
     }
+
+    
 }
