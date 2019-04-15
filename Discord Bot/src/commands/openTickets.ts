@@ -115,8 +115,9 @@ export default class BotInfoCommand implements IBotCommand {
 
         handler.addEmoji("tickets", "▶", {
           clickHandler: async data => {
-            endIndex = endIndex + perPage > max ? max : endIndex + perPage;
-            startIndex = endIndex - perPage;
+            startIndex =
+              startIndex + perPage > max ? startIndex : startIndex + perPage;
+            endIndex = startIndex + perPage;
             let embed = await show();
             return { category: "tickets", embed };
           }
@@ -124,7 +125,11 @@ export default class BotInfoCommand implements IBotCommand {
 
         let sendEmojis = async () => {
           let currentIndex = 0;
-          for (let i = startIndex; i < endIndex; i++) {
+          for (
+            let i = startIndex;
+            i < endIndex && i < max && currentIndex < perPage;
+            i++
+          ) {
             // Get emoji for ticket number ()
             let emoji = getEmojiForNumber(currentIndex);
             await sentEmbed.react(emoji);
@@ -137,7 +142,7 @@ export default class BotInfoCommand implements IBotCommand {
           embed.fields = [];
           let currentIndex = 0;
           sendEmojis();
-          for (let i = startIndex; i < endIndex; i++) {
+          for (let i = startIndex; i < endIndex && i < max; i++) {
             // Get current ticket
             let currentTicket = tickets[i];
             // Get emoji for ticket number ()
