@@ -105,41 +105,50 @@ export default class BotInfoCommand implements IBotCommand {
         handler.setCurrentCategory("tickets");
 
         handler.addEmoji("tickets", "◀", {
-          clickHandler: data => {
+          clickHandler: async data => {
             startIndex = startIndex - perPage > 0 ? startIndex - perPage : 0;
             endIndex = startIndex + perPage;
-            let embed = show();
+            let embed = await show();
             return { category: "tickets", embed };
           }
         } as OpenTicket);
 
         handler.addEmoji("tickets", "▶", {
-          clickHandler: data => {
+          clickHandler: async data => {
             endIndex = endIndex + perPage > max ? max : endIndex + perPage;
             startIndex = endIndex - perPage;
-            let embed = show();
+            let embed = await show();
             return { category: "tickets", embed };
           }
         } as OpenTicket);
 
-        let show = () => {
+        let sendEmojis = async () => {
+          let currentIndex = 0;
+          for (let i = startIndex; i < endIndex; i++) {
+            // Get emoji for ticket number ()
+            let emoji = getEmojiForNumber(currentIndex);
+            await sentEmbed.react(emoji);
+            currentIndex++;
+          }
+        };
+
+        let show = async () => {
           let embed = handler.getEmbed();
           embed.fields = [];
           let currentIndex = 0;
+          sendEmojis();
           for (let i = startIndex; i < endIndex; i++) {
             // Get current ticket
             let currentTicket = tickets[i];
             // Get emoji for ticket number ()
             let emoji = getEmojiForNumber(currentIndex);
 
-            sentEmbed.react(emoji);
-
             // Remove emoji click if exists
             handler.removeIfExistsEmoji("tickets", emoji);
 
             // Add emoji click for current ticket
             handler.addEmoji("tickets", emoji, {
-              clickHandler: data => {
+              clickHandler: async data => {
                 // Get member from guild
                 let member = client.guilds
                   .first()
@@ -241,7 +250,7 @@ export default class BotInfoCommand implements IBotCommand {
 
         handler.startCollecting(message.author.id);
 
-        let embed = show();
+        let embed = await show();
 
         sentEmbed.edit(embed);
       });
@@ -265,6 +274,6 @@ export default class BotInfoCommand implements IBotCommand {
 interface OpenTicket {
   clickHandler: (
     data: OpenTicket
-  ) => { embed: discord.RichEmbed; category: string };
+  ) => Promise<{ embed: discord.RichEmbed; category: string }>;
   ticket: { id: number; count: number; subject: string; description: string };
 }

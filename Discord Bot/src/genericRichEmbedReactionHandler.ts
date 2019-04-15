@@ -8,7 +8,7 @@ import {
 
 export abstract class GenericRichEmbedReactionHandler<
   T extends {
-    clickHandler: (data: T) => { embed: RichEmbed; category: string };
+    clickHandler: (data: T) => Promise<{ embed: RichEmbed; category: string }>;
   }
 > {
   /**
@@ -59,7 +59,7 @@ export abstract class GenericRichEmbedReactionHandler<
     return this.embed;
   }
 
-  public handleEmojiClick(emoji: string) {
+  public async handleEmojiClick(emoji: string) {
     if (this.currentCategory == null) throw new Error("Whoops no category");
 
     let data = this.currentCategory.get(emoji);
@@ -67,7 +67,7 @@ export abstract class GenericRichEmbedReactionHandler<
     if (!data) throw new Error("Whoops no emoji found");
 
     // Handle click for current emoji
-    let result = data.clickHandler(data);
+    let result = await data.clickHandler(data);
 
     this.embed = result.embed;
 
@@ -138,7 +138,7 @@ export abstract class GenericRichEmbedReactionHandler<
 
 export class RichEmbedReactionHandler<
   T extends {
-    clickHandler: (data: T) => { embed: RichEmbed; category: string };
+    clickHandler: (data: T) => Promise<{ embed: RichEmbed; category: string }>;
   }
 > extends GenericRichEmbedReactionHandler<T> {
   public getEmoji(emojiName: string): T {
