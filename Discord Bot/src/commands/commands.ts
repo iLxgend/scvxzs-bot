@@ -5,7 +5,6 @@ import {
   IBotMessage,
   IBotConfig
 } from "../api";
-import { getRandomInt } from "../utils";
 import * as discord from "discord.js";
 import { GenericRichEmbedPageHandler } from "../genericRichEmbedPageHandler";
 
