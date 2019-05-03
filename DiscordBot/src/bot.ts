@@ -11,8 +11,16 @@ import { messageService } from "./services/messageService";
 import { apiBotService } from "./services/apiBotService";
 import { channelhandler } from "./handlers/channelHandler";
 import { inDialogue } from "./models/inDialogue";
+import * as Luis from "luis-sdk-async";
 
 export class Bot implements IBot {
+  /**
+   *
+   */
+  constructor() {
+    this.setLuis(new Luis(this._config.luisAppId, this._config.luisApiKey));
+  }
+
   public get commands(): IBotCommand[] {
     return this._commands;
   }
@@ -25,6 +33,14 @@ export class Bot implements IBot {
     return this._client
       ? this._client.users.array().filter(i => i.id !== "1")
       : [];
+  }
+
+  public set setLuis(luis: any) {
+    this.luis = luis;
+  }
+
+  public get getLuis() {
+    return this.luis;
   }
 
   public get onlineUsers() {
@@ -49,6 +65,7 @@ export class Bot implements IBot {
   private _messageService!: messageService;
   private _xpHandler!: xpHandler;
   private _hasApiConnection: boolean = false;
+  private luis: any = {};
 
   public getServer() {
     return this._server;

@@ -69,6 +69,7 @@ export default class BotInfoCommand implements IBotCommand {
     config: IBotConfig,
     commands: IBotCommand[]
   ): Promise<void> {
+    
     let startupEmbed = new discord.RichEmbed()
       .setColor("#ff0000")
       .setTitle("All open tickets");
@@ -119,6 +120,7 @@ export default class BotInfoCommand implements IBotCommand {
               startIndex + perPage > max ? startIndex : startIndex + perPage;
             endIndex = startIndex + perPage;
             let embed = await show();
+
             return { category: "tickets", embed };
           }
         } as OpenTicket);
