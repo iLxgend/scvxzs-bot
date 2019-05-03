@@ -122,7 +122,8 @@ export default class CommandsCommand implements IBotCommand {
       });
 
       collector.on("end", collected => {
-        collected.first().message.delete(0);
+        let a = collected.first();
+        if (a) a.message.delete(0);
       });
     });
 
