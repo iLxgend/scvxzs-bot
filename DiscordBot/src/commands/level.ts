@@ -6,7 +6,6 @@ import * as fs from "fs"
 import { xpHandler } from '../handlers/xpHandler';
 import { postXp } from '../models/xp/postXp';
 
-const xp = require("../../xp.json");
 
 export default class LevelCommand implements IBotCommand {
     private readonly CMD_REGEXP = /^\?level/im

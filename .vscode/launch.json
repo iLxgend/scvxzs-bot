@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/Discord Bot\\src\\index.ts",
+            "program": "${workspaceFolder}/DiscordBot\\src\\index.ts",
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]

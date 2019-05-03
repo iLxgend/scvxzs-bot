@@ -40,7 +40,7 @@
   "apiBearerToken": "create bot.prod.json at same folder and put your API token Token inside",
   "apiEmail": "create bot.prod.json at same folder and put your API email Token inside",
   "apiPassword": "create bot.prod.json at same folder and put your API password Token inside",
-  "luisAppId": "",
-  "luisApiKey": "",
+  "luisAppId": "create bot.prod.json at same folder and put your API password Token inside",
+  "luisApiKey": "create bot.prod.json at same folder and put your API password Token inside",
   "name": "DapperBot"
 }

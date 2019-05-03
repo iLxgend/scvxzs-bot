@@ -436,7 +436,7 @@ export class Bot implements IBot {
     await this.luis.send(text);
 
     let intent = this.luis.intent();
-
+    if (this.luis.response.topScoringIntent.score < 0.9) return;
     if (intent === "Ticket.Create") {
       console.log("create a ticket");
 
@@ -519,7 +519,13 @@ export class Bot implements IBot {
                   );
 
                 // Send ticketEmbed
-                message.channel.send(ticketEmbed);
+                let chan = message.guild.channels.find(x=>x.name ==="help") as discord.TextChannel;
+                chan.send(ticketEmbed);
+                (msg as discord.Message).delete(0);
+              })
+              .catch((e)=> {
+                console.error(e);
+                (msg as discord.Message).delete(0);
               });
 
             return { category: "tickets", embed: myEmbed };
