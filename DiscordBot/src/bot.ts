@@ -12,15 +12,15 @@ import { apiBotService } from "./services/apiBotService";
 import { channelhandler } from "./handlers/channelHandler";
 import { inDialogue } from "./models/inDialogue";
 import * as Luis from "luis-sdk-async";
+import { RichEmbedReactionHandler } from "./genericRichEmbedReactionHandler";
+import { dialogueStep, dialogueHandler } from "./handlers/dialogueHandler";
+import { ticketDialogueData, ticketDialogue } from "./dialogues/ticketDialogue";
+import { ticketReceive } from "./models/ticket/ticketReceive";
+import { apiRequestHandler } from "./handlers/apiRequestHandler";
+import { ticket } from "./models/ticket/ticket";
+import { applicant } from "./models/ticket/applicant";
 
 export class Bot implements IBot {
-  /**
-   *
-   */
-  constructor() {
-    this.setLuis(new Luis(this._config.luisAppId, this._config.luisApiKey));
-  }
-
   public get commands(): IBotCommand[] {
     return this._commands;
   }
@@ -84,6 +84,8 @@ export class Bot implements IBot {
     this._reportChannel;
     this._kicksAndBansChannel;
     this._faqChannel;
+
+    this.luis = new Luis(this._config.luisAppId, this._config.luisApiKey);
 
     // Load all commands
     this.loadCommands(commandsPath, dataPath);
@@ -375,11 +377,165 @@ export class Bot implements IBot {
         }
       }
 
+      this.handleLuisCommands(text, message);
+
       // Handle commands
       this.handleCommands(text, message);
     });
 
     this._client.login(this._config.token);
+  }
+
+  apiCall = (data: ticketDialogueData, ticketuser: any, config: any) => {
+    // Create new ticket object
+    let ticketObject: ticket = new ticket();
+
+    // Create new applicant object
+    ticketObject.applicant = new applicant();
+
+    // Fill properties of ticket
+    ticketObject.subject = data.title;
+    ticketObject.description = data.description;
+
+    // Fill properties of applicant
+    ticketObject.applicant.username = ticketuser.displayName;
+    ticketObject.applicant.discordId = ticketuser.id;
+
+    // Post request to /api/Ticket/
+    new apiRequestHandler()
+
+      // Create request and fill params
+      .requestAPI(
+        "POST",
+        ticketObject,
+        "https://api.dapperdino.co.uk/api/ticket",
+        config
+      )
+
+      // If everything went well, we receive a ticketReceive object
+      .then(value => {
+        // Parse object
+        var ticket = JSON.parse(JSON.stringify(value)) as ticketReceive;
+
+        console.log(ticket);
+
+        // Create new channelHandler
+        new channelhandler(this._server)
+
+          // Add author to ticket
+          .createChannelTicketCommand(
+            ticket.id,
+            this._server.member(ticketuser.id)
+          );
+      });
+
+    return data;
+  };
+
+  async handleLuisCommands(text: string, message: discord.Message) {
+    await this.luis.send(text);
+
+    let intent = this.luis.intent();
+
+    if (intent === "Ticket.Create") {
+      console.log("create a ticket");
+
+      let myEmbed = new discord.RichEmbed()
+        .setTitle("Heya, I think you might need some help!")
+        .setDescription(
+          "If you want to create a ticket, react with ✅ or react with ❌ if you don't "
+        );
+
+      message.channel.send(myEmbed).then(async msg => {
+        if (Array.isArray(msg)) {
+          msg = msg[0];
+        }
+
+        await msg.react("✅");
+        await msg.react("❌");
+
+        // Array of collected info
+        let collectedInfo = new ticketDialogueData();
+
+        let handler = new RichEmbedReactionHandler<CreateTicket>(myEmbed, msg);
+        let dialogue = new ticketDialogue();
+
+        handler.addCategory("tickets", new Map());
+
+        handler.setCurrentCategory("tickets");
+
+        handler.addEmoji("tickets", "✅", {
+          clickHandler: async data => {
+            // create ticket
+
+            // Create category step
+            let titleStep: dialogueStep<ticketDialogueData> = new dialogueStep(
+              collectedInfo,
+              dialogue.titleStep,
+              "Enter a title for your ticket that quickly summarises what you are requiring assistance with: (20 - 100)",
+              "Title Successful",
+              "Title Unsuccessful"
+            );
+
+            // Create description step
+            let descriptionStep: dialogueStep<
+              ticketDialogueData
+            > = new dialogueStep(
+              collectedInfo,
+              dialogue.descriptionStep,
+              "Enter a description for your ticket. Please be as descriptive as possible so that whoever is assigned to help you knows in depth what you are struggling with: (60 - 700)",
+              "Description Successful",
+              "Description Unsuccessful"
+            );
+
+            // Create new dialogueHandler with a titleStep and descriptionStep
+            let handler = new dialogueHandler(
+              [titleStep, descriptionStep],
+              collectedInfo
+            );
+
+            // Add current message for if the user cancels the dialogue
+            handler.addRemoveMessage(message);
+
+            // Collect info from steps
+            await handler
+              .getInput(
+                message.channel as discord.TextChannel,
+                message.member,
+                this._config
+              )
+              .then(data => {
+                //API CALL
+                this.apiCall(data, message.member, this._config);
+
+                // Create ticket embed
+                let ticketEmbed = new discord.RichEmbed()
+                  .setTitle("Ticket Created Successfully!")
+                  .setColor("#ffdd05")
+                  .addField("Your Title:", data.title, false)
+                  .addField("Your Description:", data.description, false)
+                  .setFooter(
+                    "Keep in mind you're using a free service, please wait patiently."
+                  );
+
+                // Send ticketEmbed
+                message.channel.send(ticketEmbed);
+              });
+
+            return { category: "tickets", embed: myEmbed };
+          }
+        } as CreateTicket);
+
+        handler.addEmoji("tickets", "❌", {
+          clickHandler: async data => {
+            (msg as discord.Message).delete(0);
+            return { category: "tickets", embed: myEmbed };
+          }
+        } as CreateTicket);
+
+        handler.startCollecting(message.author.id);
+      });
+    }
   }
 
   private static dialogueUsers = new Array<inDialogue>();
@@ -510,4 +666,11 @@ export class Bot implements IBot {
       this._logger.info(`command "${commandName}" loaded...`);
     }
   }
+}
+
+interface CreateTicket {
+  clickHandler: (
+    data: CreateTicket
+  ) => Promise<{ embed: discord.RichEmbed; category: string }>;
+  ticket: { id: number; count: number; subject: string; description: string };
 }
