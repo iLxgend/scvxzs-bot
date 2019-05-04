@@ -1,4 +1,4 @@
-# Dapper Dino Discord Server Bot
+# Scvxzs Discord Server Bot
 
 Hello everyone, here is where you'll find my project where I am creating a Discord bot for my server to have the usual functionality of commands and events like any other Discord bot whilst also eventually adding the functionality to be able to connect with the backend of my upcoming website so that certain aspects of the Discord server will be linked online, such as leaderboards and FAQ's. The code is here so that anyone (mainly people from my server) can see how it all works and they can then impliment similar funcitonality in their own creations.
 
@@ -34,8 +34,7 @@ Then run the bot with 'node .' in the console window and hope for the best :D
 
 ## Authors
 
-* **Nathan Farrer** - *Bot Creator* - [Dapper Dino](https://github.com/DapperDino)
-* **Mick Rustenhoven** - *Website Backend* - [mickie456](https://github.com/mickie456)
+* **Scvxzs**
 
 ## License
 
